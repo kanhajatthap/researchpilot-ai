@@ -1,0 +1,240 @@
+{
+  "conversations": {
+    "d9c0102b-c089-4f63-8da9-3fc8bfa6e5ef": {
+      "id": "d9c0102b-c089-4f63-8da9-3fc8bfa6e5ef",
+      "title": "Test Conversation",
+      "messages": [
+        {
+          "id": "msg-1",
+          "role": "user",
+          "content": "Hello, what is the capital of France?",
+          "createdAt": "2026-10-13T08:57:34.341Z"
+        },
+        {
+          "id": "msg-2",
+          "role": "assistant",
+          "content": "The capital of France is Paris.",
+          "createdAt": "2026-10-13T08:57:34.341Z"
+        },
+        {
+          "id": "msg-3",
+          "role": "user",
+          "content": "What is the population of Paris?",
+          "createdAt": "2026-10-13T08:57:34.402Z"
+        },
+        {
+          "id": "msg-4",
+          "role": "assistant",
+          "content": "The population of Paris is approximately 2.1 million.",
+          "createdAt": "2026-10-13T08:57:34.402Z"
+        }
+      ],
+      "createdAt": "2026-10-13T08:57:34.373Z",
+      "updatedAt": "2026-10-13T08:57:34.408Z"
+    },
+    "886b9f8f-4c57-41a3-9338-96ec09a81de4": {
+      "id": "886b9f8f-4c57-41a3-9338-96ec09a81de4",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-13T08:57:34.423Z",
+      "updatedAt": "2026-10-13T08:57:34.423Z"
+    },
+    "1bc2afd3-6259-42bb-94c0-cc08eaefa4f0": {
+      "id": "1bc2afd3-6259-42bb-94c0-cc08eaefa4f0",
+      "title": "Test Conversation",
+      "messages": [
+        {
+          "id": "msg-1",
+          "role": "user",
+          "content": "Hello, what is the capital of France?",
+          "createdAt": "2026-10-13T09:14:41.626Z"
+        },
+        {
+          "id": "msg-2",
+          "role": "assistant",
+          "content": "The capital of France is Paris.",
+          "createdAt": "2026-10-13T09:14:41.626Z"
+        },
+        {
+          "id": "msg-3",
+          "role": "user",
+          "content": "What is the population of Paris?",
+          "createdAt": "2026-10-13T09:14:41.657Z"
+        },
+        {
+          "id": "msg-4",
+          "role": "assistant",
+          "content": "The population of Paris is approximately 2.1 million.",
+          "createdAt": "2026-10-13T09:14:41.657Z"
+        }
+      ],
+      "createdAt": "2026-10-13T09:14:41.639Z",
+      "updatedAt": "2026-10-13T09:14:41.658Z"
+    },
+    "ecfe5ce8-352a-45f8-997b-54f8afb12872": {
+      "id": "ecfe5ce8-352a-45f8-997b-54f8afb12872",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-13T09:14:41.674Z",
+      "updatedAt": "2026-10-13T09:14:41.674Z"
+    },
+    "924282d2-06eb-41dd-a5af-0650314bab2b": {
+      "id": "924282d2-06eb-41dd-a5af-0650314bab2b",
+      "title": "Hi",
+      "messages": [],
+      "createdAt": "2026-10-14T11:26:47.658Z",
+      "updatedAt": "2026-10-14T11:26:47.658Z"
+    },
+    "13076a29-5a2d-419a-b888-35d3b5905187": {
+      "id": "13076a29-5a2d-419a-b888-35d3b5905187",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-14T11:26:48.191Z",
+      "updatedAt": "2026-10-14T11:26:48.191Z"
+    },
+    "4a6363c8-2ad0-421c-8e7e-0cc2308b4324": {
+      "id": "4a6363c8-2ad0-421c-8e7e-0cc2308b4324",
+      "title": "Hi",
+      "messages": [],
+      "createdAt": "2026-10-14T11:33:06.823Z",
+      "updatedAt": "2026-10-14T11:33:06.823Z"
+    },
+    "642ddbfb-eede-48ef-8a60-2e9f80e6c593": {
+      "id": "642ddbfb-eede-48ef-8a60-2e9f80e6c593",
+      "title": "Hi",
+      "messages": [],
+      "createdAt": "2026-10-14T11:57:47.458Z",
+      "updatedAt": "2026-10-14T11:57:47.458Z"
+    },
+    "44b26fef-eba8-407a-b0a9-90bbf4ef7eac": {
+      "id": "44b26fef-eba8-407a-b0a9-90bbf4ef7eac",
+      "title": "sdfsd",
+      "messages": [],
+      "createdAt": "2026-10-14T12:11:34.779Z",
+      "updatedAt": "2026-10-14T12:11:34.779Z"
+    },
+    "3e48ecc1-9295-47e3-bef7-bdbba8eb66a6": {
+      "id": "3e48ecc1-9295-47e3-bef7-bdbba8eb66a6",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-14T12:11:34.804Z",
+      "updatedAt": "2026-10-14T12:11:34.804Z"
+    },
+    "aa7c174b-2ee5-47af-a6e3-dc4d0a0ba22f": {
+      "id": "aa7c174b-2ee5-47af-a6e3-dc4d0a0ba22f",
+      "title": "Compare Tesla revenue across two years",
+      "messages": [],
+      "createdAt": "2026-10-14T12:28:52.359Z",
+      "updatedAt": "2026-10-14T12:28:52.359Z"
+    },
+    "3a22736f-962b-457f-a9b3-c72b2292c8bb": {
+      "id": "3a22736f-962b-457f-a9b3-c72b2292c8bb",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-14T12:28:52.472Z",
+      "updatedAt": "2026-10-14T12:28:52.472Z"
+    },
+    "2b2dd5b5-2874-4f4c-8b81-8cb23bccd1fc": {
+      "id": "2b2dd5b5-2874-4f4c-8b81-8cb23bccd1fc",
+      "title": "Summarize the key findings in a report",
+      "messages": [],
+      "createdAt": "2026-10-14T12:31:24.956Z",
+      "updatedAt": "2026-10-14T12:31:24.956Z"
+    },
+    "7cc3084c-5731-474e-8078-2bc4667ebe8c": {
+      "id": "7cc3084c-5731-474e-8078-2bc4667ebe8c",
+      "title": "Untitled Research Conversation",
+      "messages": [
+        {
+          "id": "msg-1791981089996-user",
+          "role": "user",
+          "content": "Summarize the key findings in a report",
+          "createdAt": "2026-10-14T12:31:29.996Z"
+        },
+        {
+          "id": "msg-1791981089996-assistant",
+          "role": "assistant",
+          "content": "I would be happy to summarize the report for you! However, it looks like you haven't attached or pasted the report yet. \n\nPlease **paste the text** or **upload the file/link**, and I will extract the key findings.\n\nTo help me give you the best possible summary, let me know if you have any preferences:\n* **Format:** Brief bullet points, an executive summary, or a structured section-by-section breakdown?\n* **Focus Area:** Do you want me to highlight specific elements (e.g., financial data, actionable recommendations, risks, or key metrics)?\n* **Audience:** Is this summary for a quick personal read, a presentation, or an executive briefing?\n\nWhenever you're ready, share the report and I'll get to work!",
+          "createdAt": "2026-10-14T12:31:29.996Z"
+        }
+      ],
+      "createdAt": "2026-10-14T12:31:24.976Z",
+      "updatedAt": "2026-10-14T12:31:29.996Z"
+    },
+    "c4781efb-5ed0-476c-9cb0-c52798662a59": {
+      "id": "c4781efb-5ed0-476c-9cb0-c52798662a59",
+      "title": "What was Apple’s revenue in 2025?",
+      "messages": [],
+      "createdAt": "2026-10-14T12:32:00.774Z",
+      "updatedAt": "2026-10-14T12:32:00.774Z"
+    },
+    "a9f95cf2-8447-414a-a165-b362776c2705": {
+      "id": "a9f95cf2-8447-414a-a165-b362776c2705",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-14T12:32:00.798Z",
+      "updatedAt": "2026-10-14T12:32:00.798Z"
+    },
+    "cdfa24a9-cfb3-41ad-aaaa-61237ded0eb9": {
+      "id": "cdfa24a9-cfb3-41ad-aaaa-61237ded0eb9",
+      "title": "Compare Tesla revenue across two years",
+      "messages": [],
+      "createdAt": "2026-10-14T12:32:06.702Z",
+      "updatedAt": "2026-10-14T12:32:06.702Z"
+    },
+    "79922b8f-5d48-41f0-8c08-548c3d718908": {
+      "id": "79922b8f-5d48-41f0-8c08-548c3d718908",
+      "title": "Untitled Research Conversation",
+      "messages": [],
+      "createdAt": "2026-10-14T12:32:06.726Z",
+      "updatedAt": "2026-10-14T12:32:06.726Z"
+    },
+    "3f1c20ee-884e-4830-ac76-5032b23b0f39": {
+      "id": "3f1c20ee-884e-4830-ac76-5032b23b0f39",
+      "title": "Compare Tesla revenue across two years",
+      "messages": [],
+      "createdAt": "2026-10-14T12:44:56.402Z",
+      "updatedAt": "2026-10-14T12:44:56.402Z"
+    },
+    "0ea87954-6410-4cdd-90cc-8935e899fb53": {
+      "id": "0ea87954-6410-4cdd-90cc-8935e899fb53",
+      "title": "Summarize the key findings in a report",
+      "messages": [
+        {
+          "id": "msg-1791982084661-user",
+          "role": "user",
+          "content": "Summarize the key findings in a report",
+          "createdAt": "2026-10-14T12:48:04.661Z"
+        },
+        {
+          "id": "msg-1791982084661-assistant",
+          "role": "assistant",
+          "content": "Please share or paste the text, document, or key details of the report you would like me to summarize! \n\nOnce you provide it, I will break it down into:\n* **Executive Summary / Core Message:** The overall takeaway.\n* **Key Findings & Data Points:** The most important metrics, trends, or facts.\n* **Recommendations & Next Steps:** Any actionable outcomes suggested by the report.\n\n*(Note: If you have a specific format in mind—like a 3-bullet-point executive summary, a detailed breakdown, or a summary tailored for a specific audience—just let me know!)*",
+          "createdAt": "2026-10-14T12:48:04.661Z"
+        }
+      ],
+      "createdAt": "2026-10-14T12:47:54.075Z",
+      "updatedAt": "2026-10-14T12:48:04.661Z"
+    },
+    "9e05c758-0ee9-41f0-90f0-13464d1c6433": {
+      "id": "9e05c758-0ee9-41f0-90f0-13464d1c6433",
+      "title": "Summarize the key findings in a report",
+      "messages": [
+        {
+          "id": "msg-1791982592518-user",
+          "role": "user",
+          "content": "Summarize the key findings in a report",
+          "createdAt": "2026-10-14T12:56:32.518Z"
+        },
+        {
+          "id": "msg-1791982592518-assistant",
+          "role": "assistant",
+          "content": "I would be happy to summarize the key findings for you! However, it looks like you haven't provided or pasted the report yet. \n\nPlease **paste the text of the report** (or upload the file/share the text) in your reply. \n\nIf you have a preferred format, let me know if you would like:\n* An **Executive Summary** (a high-level overview in 3–5 sentences)\n* **Bullet Points of Key Findings** (categorized by main themes or topics)\n* **Data & Statistics Highlights**\n* **Actionable Takeaways / Recommendations**\n\nOnce you share the content, I will summarize it right away!",
+          "createdAt": "2026-10-14T12:56:32.518Z"
+        }
+      ],
+      "createdAt": "2026-10-14T12:56:26.729Z",
+      "updatedAt": "2026-10-14T12:56:32.518Z"
+    }
+  }
+}
