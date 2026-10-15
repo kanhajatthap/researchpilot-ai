@@ -96,10 +96,10 @@ export async function POST(req: NextRequest) {
           pageNumber?: number;
           chunkId: string;
         }> = [];
-        
+
         // Build the content for the LLM with conversation context
         let geminiContents = toGeminiContents(messages);
-        
+
         // If we have an existing conversation, add context to help resolve references
         if (existingConversation && existingConversation.messages.length > 0) {
           const contextPrompt = buildContextPrompt(existingConversation, lastMessage.content);
@@ -110,62 +110,24 @@ export async function POST(req: NextRequest) {
           }];
           geminiContents = toGeminiContents(contextMessages);
         }
-        
-        const agentTrace: Array<{
-          label: string;
-          status: string;
-          message: string;
-          startedAt: Date;
-          completedAt: Date;
-        }> = [];
-
-        // Track agent step execution
-        const trackStep = (label: string, status: string, message: string) => {
-          const now = new Date();
-          agentTrace.push({
-            label,
-            status,
-            message,
-            startedAt: now,
-            completedAt: new Date(now.getTime() + 100),
-          });
-        };
-
-        trackStep('Analyze user question', 'running', 'Analyzing intent and scope');
 
         if (documentId) {
           const userMessage = messages[messages.length - 1];
           if (userMessage.role === 'user') {
-            // Validate document readiness
-            trackStep('Validate document readiness', 'running', 'Checking document status');
-
             // Generate query embedding
-            trackStep('Generate query embedding', 'running', 'Creating query embedding via Gemini');
             const queryEmbedding = await generateQueryEmbedding(userMessage.content);
 
             // Retrieve relevant chunks
-            trackStep('Retrieve relevant chunks', 'running', 'Searching ChromaDB for relevant document chunks');
             const retrievalResult = await retrieveChunks(queryEmbedding, 5, documentId);
 
             // Validate document exists and is ready
             const chunks = retrievalResult.chunks;
-            if (chunks.length === 0) {
-              trackStep('No chunks retrieved', 'error', 'No relevant chunks found for this query');
-            } else {
-              trackStep('Construct RAG prompt', 'running', 'Building grounded prompt with retrieved context');
+            if (chunks.length > 0) {
               // Construct RAG prompt and citations
               const { prompt, citations: ragCitations } = constructRagPrompt(userMessage.content, retrievalResult);
 
               // Validate citations against retrieved chunks
-              trackStep('Validate citations', 'running', 'Verifying citations reference actual retrieved chunks');
               const validatedCitations = validateCitations(ragCitations, retrievalResult.chunks);
-
-              // Replace the last user message with the RAG-enhanced prompt
-              const ragMessages = [...messages.slice(0, messages.length - 1), {
-                role: 'user' as const,
-                content: prompt,
-              }];
-              geminiContents = toGeminiContents(ragMessages);
 
               // Update citations with validated ones
               citations = validatedCitations.map(c => ({
@@ -175,14 +137,15 @@ export async function POST(req: NextRequest) {
                 chunkId: c.chunkId,
               }));
 
-              trackStep('Citations validated', 'completed', `${validatedCitations.length} citations validated`);
+              // Replace the last user message with the RAG-enhanced prompt
+              const ragMessages = [...messages.slice(0, messages.length - 1), {
+                role: 'user' as const,
+                content: prompt,
+              }];
+              geminiContents = toGeminiContents(ragMessages);
             }
           }
-        } else {
-          trackStep('No document context', 'running', 'Chat without document context - using general knowledge');
         }
-
-        trackStep('Generate model response', 'running', 'Streaming response from Gemini model');
 
         const response = await gemini.models.generateContentStream({
           model: geminiModel,
@@ -198,15 +161,12 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Send final metadata with citations and agent trace
+        // Send final metadata with citations (no fake agent trace)
         if (citations.length > 0) {
-          enqueue({ citations, done: true, trace: agentTrace, conversationId });
+          enqueue({ citations, done: true, conversationId });
         } else {
-          enqueue({ done: true, trace: agentTrace, conversationId });
+          enqueue({ done: true, conversationId });
         }
-
-        // Mark agent workflow as complete
-        trackStep('Workflow complete', 'completed', 'Chat processing finished');
 
         // Persist the conversation
         const userMsg: Message = {
@@ -216,16 +176,16 @@ export async function POST(req: NextRequest) {
           createdAt: new Date(),
         };
         const assistantCitations: Citation[] = citations.length > 0
-  ? citations.map((c) => ({
-      id: c.chunkId || `citation-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      documentId: c.documentId,
-      documentName: c.documentName,
-      pageNumber: c.pageNumber,
-      chunkId: c.chunkId,
-    }))
-  : [];
+          ? citations.map((c) => ({
+              id: c.chunkId || `citation-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+              documentId: c.documentId,
+              documentName: c.documentName,
+              pageNumber: c.pageNumber,
+              chunkId: c.chunkId,
+            }))
+          : [];
 
-const assistantMsg: Message = {
+        const assistantMsg: Message = {
           id: `msg-${Date.now()}-assistant`,
           role: 'assistant',
           content: fullResponse,
@@ -234,7 +194,7 @@ const assistantMsg: Message = {
         };
 
         // Add to existing conversation or create new
-        const allMessages = existingConversation 
+        const allMessages = existingConversation
           ? [...existingConversation.messages, userMsg, assistantMsg]
           : [userMsg, assistantMsg];
 

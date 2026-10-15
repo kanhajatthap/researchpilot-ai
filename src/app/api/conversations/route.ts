@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   listConversations,
-  getConversationMetadata,
+  getConversation,
   createConversation,
   renameConversation,
   deleteConversation
@@ -28,6 +28,7 @@ interface GetConversationResponse {
     createdAt: string;
     updatedAt: string;
     messageCount: number;
+    messages: Message[];
   } | null;
 }
 
@@ -60,20 +61,44 @@ function errorMessage(error: unknown, fallback: string): string {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const limitParam = searchParams.get('limit');
-    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
-    
-    const conversations = await listConversations(limit);
-    
-    const response: ListConversationsResponse = {
-      conversations
-    };
-    
-    return NextResponse.json(response);
+    const id = searchParams.get('id');
+
+    if (id) {
+      // Get specific conversation with messages
+      const conversation = await getConversation(id);
+      if (!conversation) {
+        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      }
+
+      const response: GetConversationResponse = {
+        conversation: {
+          id: conversation.id,
+          title: conversation.title,
+          createdAt: conversation.createdAt.toISOString(),
+          updatedAt: conversation.updatedAt.toISOString(),
+          messageCount: conversation.messages.length,
+          messages: conversation.messages,
+        }
+      };
+
+      return NextResponse.json(response);
+    } else {
+      // List all conversations
+      const limitParam = searchParams.get('limit');
+      const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+
+      const conversations = await listConversations(limit);
+
+      const response: ListConversationsResponse = {
+        conversations
+      };
+
+      return NextResponse.json(response);
+    }
   } catch (error) {
     console.error('[api/conversations] GET error:', errorMessage(error, 'Unknown error'));
     return NextResponse.json(
-      { error: 'Failed to list conversations' },
+      { error: 'Failed to retrieve conversations' },
       { status: 500 }
     );
   }
@@ -82,7 +107,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    
+
     // Validate request body
     if (!body || typeof body !== 'object') {
       return NextResponse.json(
@@ -90,16 +115,16 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     const { title, messages = [] } = body as CreateConversationRequest;
-    
+
     // Validate messages if provided
     if (messages && Array.isArray(messages)) {
       for (const msg of messages) {
-        if (!msg || typeof msg !== 'object' || 
-            typeof msg.role !== 'string' || 
-            !['user', 'assistant', 'system'].includes(msg.role) ||
-            typeof msg.content !== 'string') {
+        if (!msg || typeof msg !== 'object' ||
+          typeof msg.role !== 'string' ||
+          !['user', 'assistant', 'system'].includes(msg.role) ||
+          typeof msg.content !== 'string') {
           return NextResponse.json(
             { error: 'Invalid message format' },
             { status: 400 }
@@ -107,7 +132,7 @@ export async function POST(req: NextRequest) {
         }
       }
     }
-    
+
     let conversationTitle = title;
     if (!conversationTitle && messages.length > 0) {
       // Generate title from first user message if no title provided
@@ -116,17 +141,17 @@ export async function POST(req: NextRequest) {
         conversationTitle = generateTitleFromMessage(firstUserMessage.content);
       }
     }
-    
+
     if (!conversationTitle) {
       conversationTitle = 'Untitled Research Conversation';
     }
-    
+
     const conversationId = await createConversation(conversationTitle, messages);
-    
+
     const response: CreateConversationResponse = {
       conversationId
     };
-    
+
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error('[api/conversations] POST error:', errorMessage(error, 'Unknown error'));
@@ -141,45 +166,45 @@ export async function PUT(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Conversation ID is required' },
         { status: 400 }
       );
     }
-    
+
     const body = await req.json();
-    
+
     if (!body || typeof body !== 'object') {
       return NextResponse.json(
         { error: 'Invalid request body' },
         { status: 400 }
       );
     }
-    
+
     const { title } = body as RenameConversationRequest;
-    
+
     if (typeof title !== 'string' || title.trim() === '') {
       return NextResponse.json(
         { error: 'Title is required and must be a non-empty string' },
         { status: 400 }
       );
     }
-    
+
     const success = await renameConversation(id, title);
-    
+
     if (!success) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       );
     }
-    
+
     const response: RenameConversationResponse = {
       success: true
     };
-    
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('[api/conversations] PUT error:', errorMessage(error, 'Unknown error'));
@@ -194,27 +219,27 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Conversation ID is required' },
         { status: 400 }
       );
     }
-    
+
     const success = await deleteConversation(id);
-    
+
     if (!success) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       );
     }
-    
+
     const response: DeleteConversationResponse = {
       success: true
     };
-    
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('[api/conversations] DELETE error:', errorMessage(error, 'Unknown error'));

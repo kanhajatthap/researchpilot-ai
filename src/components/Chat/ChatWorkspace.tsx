@@ -363,11 +363,27 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
   }, [setSelectedConversationId]);
 
   const handleSelectConversation = useCallback(
-    (id: string) => {
+    async (id: string) => {
       setSelectedConversationId(id);
-      setMessages([]);
       setError(null);
       setHistoryOpen(false);
+      
+      // Load conversation messages from server
+      try {
+        const res = await fetch(`/api/conversations?id=${encodeURIComponent(id)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.conversation && data.conversation.messages) {
+            setMessages(data.conversation.messages);
+          } else {
+            setMessages([]);
+          }
+        } else {
+          setMessages([]);
+        }
+      } catch {
+        setMessages([]);
+      }
     },
     [setSelectedConversationId]
   );
