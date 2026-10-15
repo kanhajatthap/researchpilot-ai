@@ -7,11 +7,13 @@ import type { Document, DocumentChunk } from '@/types/document';
  * Local file-based storage for document metadata and chunk manifest.
  * Keeps document records consistent with ChromaDB vector records.
  * Stored as a single JSON file that is read-modified-written atomically.
+ * Also stores uploaded PDF files in a dedicated directory.
  */
 
 export interface DocumentRecord extends Omit<Document, 'metadata'> {
   chunks?: DocumentChunk[];
   metadata?: Record<string, unknown>;
+  filePath?: string; // Path to stored PDF file (relative to data dir)
 }
 
 interface StoreState {
@@ -27,6 +29,10 @@ function dataDir(): string {
 
 function storePath(): string {
   return path.join(dataDir(), 'documents.json');
+}
+
+function fileDir(): string {
+  return path.join(dataDir(), 'files');
 }
 
 async function readStore(): Promise<StoreState> {
@@ -52,6 +58,7 @@ async function writeStore(state: StoreState): Promise<void> {
   inMemory = state;
   const dir = dataDir();
   await fs.mkdir(dir, { recursive: true });
+  await fs.mkdir(fileDir(), { recursive: true });
   // Atomic write via temp + rename.
   const tmp = storePath() + '.tmp.' + randomUUID();
   await fs.writeFile(tmp, JSON.stringify(state, null, 2), 'utf-8');
@@ -108,6 +115,18 @@ export const documentStore = {
   async delete(id: string): Promise<boolean> {
     const state = await readStore();
     if (!state.documents[id]) return false;
+    
+    // Remove the stored file if it exists
+    const filePath = state.documents[id].filePath;
+    if (filePath) {
+      const fullPath = path.join(fileDir(), filePath);
+      try {
+        await fs.unlink(fullPath);
+      } catch (e) {
+        console.error('File deletion error:', e);
+      }
+    }
+    
     delete state.documents[id];
     await writeStore(state);
     return true;
@@ -116,5 +135,47 @@ export const documentStore = {
   _resetForTests(): void {
     inMemory = { documents: {} };
   },
-};
 
+  /**
+   * Check if a document with the same filename and size already exists.
+   * Useful for idempotent upload handling.
+   */
+  async findByFileNameAndSize(fileName: string, fileSize: number): Promise<Document | null> {
+    const state = await readStore();
+    for (const doc of Object.values(state.documents)) {
+      if (doc.fileName === fileName && doc.size === fileSize) {
+        return doc;
+      }
+    }
+    return null;
+  },
+
+  /**
+   * Mark a document as failed with an error message.
+   * This can be called from the API when processing fails.
+   */
+  async markFailed(id: string, errorMessage: string): Promise<Document | null> {
+    return this.update(id, { status: 'error', error: errorMessage });
+  },
+
+  /**
+   * Mark a document as queued (for batch processing or retry queuing).
+   */
+  async markQueued(id: string): Promise<Document | null> {
+    return this.update(id, { status: 'queued' });
+  },
+
+  /**
+   * Mark a document as processing (active job).
+   */
+  async markProcessing(id: string): Promise<Document | null> {
+    return this.update(id, { status: 'processing' });
+  },
+
+  /**
+   * Mark a document as ready with chunk/page counts.
+   */
+  async markReady(id: string, chunkCount: number, pageCount: number): Promise<Document | null> {
+    return this.update(id, { status: 'ready', chunkCount, pageCount });
+  },
+};

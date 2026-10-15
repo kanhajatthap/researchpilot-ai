@@ -14,11 +14,12 @@ export interface Document {
   fileName: string;
   fileType: string;
   size: number;
-  status: 'uploading' | 'processing' | 'ready' | 'error';
+  status: 'uploading' | 'queued' | 'processing' | 'ready' | 'error';
   uploadedAt: Date;
   pageCount?: number;
   chunkCount?: number;
   metadata?: Record<string, unknown>;
+  error?: string; // Error message if status is 'error'
 }
 
 export interface Citation {

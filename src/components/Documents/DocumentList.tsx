@@ -48,7 +48,10 @@ export function DocumentList({ className }: DocumentListProps) {
     setDeletingId(id);
     try {
       const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Delete failed');
+      }
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
@@ -60,6 +63,22 @@ export function DocumentList({ className }: DocumentListProps) {
   const handleUploadSuccess = useCallback(() => {
     fetchDocuments();
   }, [fetchDocuments]);
+
+  const handleRetry = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/documents/${id}`, { method: 'POST' });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Retry failed');
+      }
+      // Reload documents after retry
+      setDocuments((prev) => prev.map((d) => 
+        d.id === id ? { ...d, status: 'queued' } : d
+      ));
+    } catch (err) {
+      console.error('Retry error:', err);
+    }
+  }, []);
 
   return (
     <Card className={cn('flex flex-col gap-0 py-0', className)}>
@@ -112,6 +131,7 @@ export function DocumentList({ className }: DocumentListProps) {
                 document={doc}
                 onDelete={handleDelete}
                 isDeleting={deletingId === doc.id}
+                onRetry={handleRetry}
               />
             ))}
           </div>

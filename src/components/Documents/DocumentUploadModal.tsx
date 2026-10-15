@@ -64,7 +64,15 @@ export function DocumentUploadModal({ open, onOpenChange, onUploadSuccess }: Doc
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        // If document already exists and is being processed, show its status
+        if (response.status === 409 && errorData.documentId) {
+          setError(`Document is already being processed (ID: ${errorData.documentId})`);
+          setFile(null);
+          if (onUploadSuccess) onUploadSuccess();
+        } else {
+          throw new Error(errorData.error || 'Upload failed');
+        }
+        return;
       }
 
       const result = await response.json();
@@ -101,7 +109,7 @@ export function DocumentUploadModal({ open, onOpenChange, onUploadSuccess }: Doc
             <h2 className="text-lg font-semibold">Upload Document</h2>
             <p className="text-sm text-muted-foreground">Upload PDF documents to enable RAG-powered questions</p>
           </div>
-          <form className="space-y-4">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-medium" htmlFor="document-upload">
                 PDF File
@@ -146,6 +154,7 @@ export function DocumentUploadModal({ open, onOpenChange, onUploadSuccess }: Doc
               Cancel
             </Button>
             <Button
+              type="button"
               onClick={handleUpload}
               disabled={uploading || !file}
               className="w-full sm:w-auto"

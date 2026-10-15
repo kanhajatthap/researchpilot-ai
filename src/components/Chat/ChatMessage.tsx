@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Citation, Message } from '@/types/chat';
 import { Check, Copy, FileText, Sparkles, User } from 'lucide-react';
+import { RenderedMessage } from './RenderedMessage';
 
 export interface ChatMessageProps {
   message: Message;
@@ -92,15 +93,13 @@ export function ChatMessage({
         </div>
 
         <div className='text-sm leading-relaxed text-foreground/90'>
-          <p className='whitespace-pre-wrap break-words'>
-            {message.content}
-            {isStreaming && (
-              <span
-                className='rp-dot ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 rounded-[1px] bg-foreground/70 align-middle'
-                aria-hidden
-              />
-            )}
-          </p>
+          <RenderedMessage
+            content={message.content}
+            className='prose prose-sm max-w-none dark:prose-invert sm:prose-base'
+          />
+          {isStreaming && (
+            <span className='rp-dot ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 rounded-[1px] bg-foreground/70 align-middle' aria-hidden />
+          )}
         </div>
 
         {visibleCitations.length > 0 && (

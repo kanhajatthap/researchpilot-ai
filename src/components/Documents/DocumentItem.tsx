@@ -2,13 +2,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Document } from '@/types/document';
-import { FileText, Loader2, Trash2 } from 'lucide-react';
+import { FileText, Loader2, Trash2, RefreshCw } from 'lucide-react';
 
 export interface DocumentItemProps {
   document: Document;
   className?: string;
   onDelete?: (id: string) => void;
   isDeleting?: boolean;
+  onRetry?: (id: string) => void;
 }
 
 function formatBytes(bytes: number) {
@@ -22,13 +23,20 @@ function formatBytes(bytes: number) {
 const STATUS_STYLES: Record<Document['status'], { label: string; badge: string }> = {
   ready: { label: 'Ready', badge: 'border-success/30 bg-success/10 text-success' },
   processing: { label: 'Processing', badge: 'border-warning/30 bg-warning/10 text-warning' },
+  queued: { label: 'Queued', badge: 'border-info/30 bg-info/10 text-info' },
   uploading: { label: 'Uploading', badge: 'border-warning/30 bg-warning/10 text-warning' },
   error: { label: 'Error', badge: 'border-destructive/30 bg-destructive/10 text-destructive' },
 };
 
-export function DocumentItem({ document, className, onDelete, isDeleting = false }: DocumentItemProps) {
+export function DocumentItem({ 
+  document, 
+  className, 
+  onDelete, 
+  isDeleting = false,
+  onRetry 
+}: DocumentItemProps) {
   const status = STATUS_STYLES[document.status];
-  const busy = document.status === 'processing' || document.status === 'uploading';
+  const busy = document.status === 'processing' || document.status === 'uploading' || document.status === 'queued';
 
   return (
     <div
@@ -55,6 +63,14 @@ export function DocumentItem({ document, className, onDelete, isDeleting = false
               <span>{document.pageCount} pages</span>
             </>
           ) : null}
+          {document.status === 'error' && document.error ? (
+            <>
+              <span className='text-muted-foreground/40'>·</span>
+              <span className='text-destructive text-xs' title={document.error}>
+                {(document.error.length > 30 ? document.error.substring(0, 30) + '…' : document.error)}
+              </span>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -63,6 +79,20 @@ export function DocumentItem({ document, className, onDelete, isDeleting = false
           {busy && <Loader2 className='animate-spin' />}
           {status.label}
         </Badge>
+
+        {document.status === 'error' && onRetry ? (
+          <Button
+            variant='outline'
+            size='icon-xs'
+            className='text-info transition-opacity hover:text-info/80'
+            onClick={() => onRetry(document.id)}
+            disabled={isDeleting}
+            aria-label={`Retry processing ${document.name}`}
+            title={'Retry processing'}
+          >
+            <RefreshCw className='size-4' />
+          </Button>
+        ) : null}
 
         {onDelete && (
           <Button
