@@ -18,6 +18,7 @@ export function DocumentList({ className }: DocumentListProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchDocuments = useCallback(async () => {
@@ -46,6 +47,7 @@ export function DocumentList({ className }: DocumentListProps) {
 
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
+    setActionError(null);
     try {
       const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' });
       if (!res.ok) {
@@ -55,6 +57,7 @@ export function DocumentList({ className }: DocumentListProps) {
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
+      setActionError(err instanceof Error ? err.message : 'Delete failed');
     } finally {
       setDeletingId(null);
     }
@@ -65,20 +68,20 @@ export function DocumentList({ className }: DocumentListProps) {
   }, [fetchDocuments]);
 
   const handleRetry = useCallback(async (id: string) => {
+    setActionError(null);
     try {
-      const res = await fetch(`/api/documents/${id}`, { method: 'POST' });
+      const res = await fetch(`/api/documents/${id}/retry`, { method: 'POST' });
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Retry failed');
       }
-      // Reload documents after retry
-      setDocuments((prev) => prev.map((d) => 
-        d.id === id ? { ...d, status: 'queued' } : d
-      ));
+      // Refresh from the server so the UI reflects the authoritative status.
+      await fetchDocuments();
     } catch (err) {
       console.error('Retry error:', err);
+      setActionError(err instanceof Error ? err.message : 'Retry failed');
     }
-  }, []);
+  }, [fetchDocuments]);
 
   return (
     <Card className={cn('flex flex-col gap-0 py-0', className)}>
@@ -102,6 +105,23 @@ export function DocumentList({ className }: DocumentListProps) {
           Upload
         </Button>
       </div>
+
+      {actionError && (
+        <div
+          role='alert'
+          className='flex items-start gap-2 border-b border-destructive/30 bg-destructive/10 px-3.5 py-2 text-xs font-medium text-destructive'
+        >
+          <span className='flex-1'>{actionError}</span>
+          <button
+            type='button'
+            onClick={() => setActionError(null)}
+            className='shrink-0 rounded px-1 text-destructive/80 hover:text-destructive'
+            aria-label='Dismiss error'
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <div className='max-h-[260px] overflow-y-auto p-3'>
         {documents.length === 0 ? (

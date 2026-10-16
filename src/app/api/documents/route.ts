@@ -1,162 +1,157 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractPdfText } from '@/lib/rag/extractor';
-import { chunkText } from '@/lib/rag/chunker';
-import { Embedder } from '@/lib/rag/embedder';
-import { vectorStore, VectorChunk } from '@/lib/rag/vectorstore';
 import { documentStore } from '@/lib/rag/document-store';
-import type { Document } from '@/types/document';
-import { randomUUID } from 'crypto';
+import {
+  processDocument,
+  DocumentValidationError,
+  sanitizeFailureMessage,
+} from '@/lib/rag/document-processor';
+import {
+  DEFAULT_EMBEDDING_BATCH_SIZE,
+  DEFAULT_EMBEDDING_CONCURRENCY,
+  resolveEmbeddingContentsPerMinute,
+  resolveProcessingTimeoutMs,
+} from '@/lib/rag/embedding-config';
+import { createHash } from 'crypto';
 
 export const runtime = 'nodejs';
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
-const EMBEDDING_BATCH_SIZE = 5; // Conservative batch size for rate limits
-const PROCESSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes total processing timeout
+const PROCESSING_TIMEOUT_MS = resolveProcessingTimeoutMs();
+const EMBEDDING_CONTENTS_PER_MINUTE = resolveEmbeddingContentsPerMinute();
 
+/**
+ * POST /api/documents
+ *
+ * Upload pipeline (single authoritative path, shared with retry):
+ *   1. Validate the file (type + size).
+ *   2. Atomically resolve duplicate policy against stored documents
+ *      (documentStore.beginUpload) — content-hash identity, legacy adoption.
+ *   3. Persist the PDF to disk so retries can reprocess it.
+ *   4. Claim the processing attempt (attemptId-gated write).
+ *   5. Run the shared processing pipeline.
+ *   6. Return a clear response; every failure leaves a terminal status.
+ */
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const file = form.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-  
+
   // Validate file type
   if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
     return NextResponse.json({ error: 'Only PDF files are supported' }, { status: 400 });
   }
-  
+
   // Validate file size
-  if (file.size > MAX_SIZE) return NextResponse.json({ error: `File too large (max ${MAX_SIZE / 1024 / 1024} MB)` }, { status: 400 });
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json(
+      { error: `File too large (max ${MAX_SIZE / 1024 / 1024} MB)` },
+      { status: 400 },
+    );
+  }
 
   try {
-    // Check for existing document with same filename and size (idempotency)
-    const existingDoc = await documentStore.findByFileNameAndSize(file.name, file.size);
-    if (existingDoc) {
-      // Return existing document if it's already ready
-      if (existingDoc.status === 'ready') {
+    const arrayBuf = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuf);
+    const contentHash = createHash('sha256').update(buffer).digest('hex');
+
+    // Atomic duplicate resolution. Two concurrent uploads of the same bytes
+    // cannot both create a record.
+    const resolved = await documentStore.beginUpload({
+      name: file.name.replace(/\.pdf$/i, ''),
+      fileName: file.name,
+      size: file.size,
+      contentHash,
+    });
+
+    if (resolved.kind === 'existing') {
+      const existing = resolved.doc;
+      if (existing.status === 'ready') {
         return NextResponse.json({
           success: true,
-          documentId: existingDoc.id,
+          documentId: existing.id,
           message: 'Document already processed',
         });
       }
-      // Return existing document if it's already errored (allow retry)
-      if (existingDoc.status === 'error') {
+      if (existing.status === 'error') {
         return NextResponse.json({
           success: false,
-          documentId: existingDoc.id,
-          error: existingDoc.error || 'Document processing failed previously',
+          documentId: existing.id,
+          error: existing.error || 'Document processing failed previously. You can retry it.',
         }, { status: 400 });
       }
-      // If document is still processing, return its ID with a message
-      if (existingDoc.status === 'processing' || existingDoc.status === 'queued') {
-        return NextResponse.json({
-          success: false,
-          documentId: existingDoc.id,
-          error: 'Document is already being processed',
-          status: existingDoc.status,
-        }, { status: 409 }); // Conflict - already processing
-      }
+      // queued / processing — an attempt is already in flight.
+      return NextResponse.json({
+        success: false,
+        documentId: existing.id,
+        error: 'Document is already being processed',
+        status: existing.status,
+      }, { status: 409 });
     }
 
-    // Create document record with queued status initially
-    const doc: Document = await documentStore.create({
-      name: file.name.replace(/\.pdf$/i, ''),
-      fileName: file.name,
-      fileType: 'pdf',
-      size: file.size,
-      status: 'queued',
-      uploadedAt: new Date(),
-    });
+    const doc = resolved.doc;
+    const attemptId = doc.attemptId;
+    if (!attemptId) {
+      // Defensive: beginUpload always assigns an attempt.
+      return NextResponse.json({ error: 'Failed to claim processing attempt' }, { status: 500 });
+    }
 
-    // Mark as processing immediately to avoid duplicate queue entries
-    await documentStore.markProcessing(doc.id);
-
-    // Set up timeout to mark as failed if processing takes too long
-    const timeoutId = setTimeout(async () => {
-      try {
-        await documentStore.markFailed(doc.id, `Processing timeout after ${PROCESSING_TIMEOUT_MS / 1000}s`);
-        console.log(`Document ${doc.id} timed out and marked as failed`);
-      } catch (e) {
-        console.error(`Failed to timeout document ${doc.id}:`, e);
-      }
-    }, PROCESSING_TIMEOUT_MS);
-
-    let processedSuccessfully = false;
-    
+    // Persist the uploaded PDF to disk so retries can reprocess without re-uploading.
     try {
-      // Extract PDF text
-      const arrayBuf = await file.arrayBuffer();
-      const pageTexts = await extractPdfText(arrayBuf);
-      const hasText = pageTexts.some((p) => p.text.length > 0);
-      if (!hasText) {
-        clearTimeout(timeoutId);
-        await documentStore.markFailed(doc.id, 'No extractable text found. OCR not supported in this phase.');
-        return NextResponse.json({ error: 'No extractable text found. OCR not supported in this phase.' }, { status: 400 });
-      }
+      const storedName = await documentStore.saveFile(doc.id, buffer, file.name);
+      await documentStore.setFilePath(doc.id, storedName);
+    } catch (e) {
+      console.error(`[upload] failed to persist PDF document=${doc.id} attempt=${attemptId}:`, e);
+      await documentStore.markFailedIfAttempt(doc.id, 'Failed to persist uploaded file', attemptId);
+      return NextResponse.json({ error: 'Failed to persist uploaded file' }, { status: 500 });
+    }
 
-      // Chunk text
-      const chunks = chunkText(pageTexts, 800, 200);
-      if (chunks.length === 0) {
-        clearTimeout(timeoutId);
-        await documentStore.markFailed(doc.id, 'No text chunks generated from document.');
-        return NextResponse.json({ error: 'No text chunks generated from document.' }, { status: 400 });
-      }
-
-      // Generate embeddings in batches to respect rate limits
-      const embedder = new Embedder();
-      const embeddings: number[][] = [];
-      for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
-        const batch = chunks.slice(i, i + EMBEDDING_BATCH_SIZE);
-        const batchTexts = batch.map((c) => c.text);
-        const batchEmbeddings = await embedder.embedBatch(batchTexts);
-        embeddings.push(...batchEmbeddings);
-        // Small delay between batches to avoid rate limits
-        if (i + EMBEDDING_BATCH_SIZE < chunks.length) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      // Create vector chunks and store in ChromaDB
-      const vchunks: VectorChunk[] = chunks.map((c, i) => ({
-        id: doc.id + '_c' + i,
+    // Claim the attempt before processing starts (attempt-gated).
+    const claimed = await documentStore.markProcessingIfAttempt(doc.id, attemptId);
+    if (!claimed) {
+      return NextResponse.json({
+        success: false,
         documentId: doc.id,
-        documentName: file.name.replace(/\.pdf$/i, ''),
-        pageNumber: c.pageNumber,
-        chunkIndex: c.chunkIndex,
-        text: c.text,
-        embedding: embeddings[i],
-      }));
-      await vectorStore.addChunks(vchunks);
+        error: 'Document was superseded by another operation',
+      }, { status: 409 });
+    }
 
-      // Update document as ready with chunk count
-      await documentStore.markReady(doc.id, chunks.length, pageTexts.length);
-      processedSuccessfully = true;
-      
+    // Delegate the full processing pipeline to the shared processor.
+    try {
+      const result = await processDocument(arrayBuf, claimed, {
+        documentId: doc.id,
+        attemptId,
+        embeddingBatchSize: DEFAULT_EMBEDDING_BATCH_SIZE,
+        embeddingConcurrency: DEFAULT_EMBEDDING_CONCURRENCY,
+        embeddingContentsPerMinute: EMBEDDING_CONTENTS_PER_MINUTE,
+        timeoutMs: PROCESSING_TIMEOUT_MS,
+      });
+
       return NextResponse.json({
         success: true,
         documentId: doc.id,
-        chunks: chunks.length,
-        pages: pageTexts.length,
+        chunks: result.chunks,
+        pages: result.pages,
+        ...(resolved.kind === 'adopt' ? { adopted: true } : {}),
       });
-      
     } catch (error: unknown) {
-      // Clear timeout on normal error handling
-      clearTimeout(timeoutId);
-      
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Document processing error:', error);
-      
-      // Update document status to error with details
-      await documentStore.markFailed(doc.id, message);
-      
-      return NextResponse.json({ error: `Failed to process document: ${message}` }, { status: 500 });
-    } finally {
-      if (!processedSuccessfully) {
-        clearTimeout(timeoutId);
+      if (error instanceof DocumentValidationError) {
+        return NextResponse.json({ error: error.message, documentId: doc.id }, { status: 400 });
       }
+      // processDocument already marked the document as failed (attempt-gated).
+      const message = sanitizeFailureMessage(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+      console.error(`[upload] processing failed document=${doc.id} attempt=${attemptId} error=${message}`);
+      return NextResponse.json(
+        { error: `Failed to process document: ${message}`, documentId: doc.id },
+        { status: 500 },
+      );
     }
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Document upload error:', error);
+    // Any failure before/around record creation: no orphaned processing record
+    // is left behind (the record is either absent or already terminal).
+    const message = sanitizeFailureMessage(error instanceof Error ? error.message : 'Unknown error');
+    console.error(`[upload] upload failed: ${message}`);
     return NextResponse.json({ error: `Failed to process document: ${message}` }, { status: 500 });
   }
 }

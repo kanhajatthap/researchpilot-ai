@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# runtime data (local vector store + uploaded document files) - not source
+/data/chroma/
+/data/documents/files/
