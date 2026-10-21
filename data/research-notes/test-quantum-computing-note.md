@@ -1,6 +1,6 @@
 ---
 title: "Test Quantum Computing Note"
-date: "2026-10-21T10:00:10.928Z"
+date: "2026-10-21T10:00:34.423Z"
 generator: "ResearchPilot AI Agent"
 ---
 
