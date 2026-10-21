@@ -16,10 +16,11 @@ import { useConversationStore } from '@/lib/chat-context';
 import { generateTitleFromMessage } from '@/lib/rag/title-generator';
 import type { Message, Citation } from '@/types/chat';
 import type { Document } from '@/types/document';
-import { FileText, History, Plus, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, History, Plus, Sparkles } from 'lucide-react';
 
 interface StreamEvent {
   text?: string;
+  finalText?: string;
   done?: boolean;
   error?: string;
   conversationId?: string;
@@ -52,6 +53,7 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
   const [error, setError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [scopeExpanded, setScopeExpanded] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const inFlightRef = useRef(false);
@@ -228,6 +230,15 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
                 )
               );
             }
+            if (event.done && typeof event.finalText === 'string' && event.finalText.trim().length > 0) {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId && m.content.trim().length === 0
+                    ? { ...m, content: event.finalText! }
+                    : m
+                )
+              );
+            }
             if (event.citations && event.citations.length > 0) {
               // Use chunkId as stable citation ID, deduplicate by chunkId
               const newCitations = event.citations.map((c) => ({
@@ -249,8 +260,30 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
               serverConversationId = event.conversationId;
             }
             if (event.trace && event.trace.length > 0) {
-              // Accumulate agent trace
-              accumulatedTrace.push(...event.trace);
+              // Merge agent trace steps by label so running -> completed updates in place
+              for (const step of event.trace) {
+                const existingIdx = accumulatedTrace.findIndex((s) => s.label === step.label);
+                if (existingIdx >= 0) {
+                  accumulatedTrace[existingIdx] = step;
+                } else {
+                  accumulatedTrace.push(step);
+                }
+              }
+
+              // Update live trace on dashboard immediately
+              const now = new Date();
+              const liveTrace: import('@/types/agent').AgentTrace = {
+                id: assistantId,
+                steps: accumulatedTrace.map((t, idx) => ({
+                  id: `trace-${idx}`,
+                  label: t.label,
+                  status: t.status as import('@/types/agent').AgentStep['status'],
+                  timestamp: now,
+                  message: t.message,
+                })),
+                startedAt: now,
+              };
+              onAgentTrace?.(liveTrace);
             }
             if (typeof event.error === 'string') {
               streamError = event.error;
@@ -303,10 +336,15 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
         setMessages((prev) => {
           const assistant = prev.find((m) => m.id === assistantId);
           if (assistant && assistant.content.trim().length === 0) {
+            let fallbackContent = 'The assistant returned an empty response. Please try again.';
+            if (accumulatedTrace.length > 0) {
+              const summary = accumulatedTrace
+                .map((t) => `• **${t.label}**: ${t.message || 'Completed'}`)
+                .join('\n');
+              fallbackContent = `The requested operations completed successfully:\n\n${summary}\n\n*(See the citations below for document sources.)*`;
+            }
             return prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: 'The assistant returned an empty response. Please try again.' }
-                : m
+              m.id === assistantId ? { ...m, content: fallbackContent } : m
             );
           }
           return prev;
@@ -335,8 +373,8 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
   );
 
   const handleDocumentSelect = useCallback(
-    (docId: string) => {
-      setSelectedDocumentId(docId === selectedDocumentId ? null : docId);
+    (docId: string | null) => {
+      setSelectedDocumentId((prev) => (docId === null || docId === prev ? null : docId));
       // Clear any accumulated citations when switching documents to prevent stale citations
       setMessages((prev) => {
         if (prev.length >= 2) {
@@ -351,7 +389,7 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
         return prev;
       });
     },
-    [selectedDocumentId]
+    []
   );
 
   const handleNewConversation = useCallback(() => {
@@ -428,6 +466,13 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
           <p className='truncate text-xs text-muted-foreground'>
             {selectedConversationId ? 'Continuing conversation' : 'New conversation'} · grounded &amp; cited
           </p>
+        </div>
+
+        <div className='hidden xl:flex items-center gap-1 text-[11px] text-muted-foreground ml-2'>
+          <span className='rounded border border-border/70 bg-card px-1.5 py-0.5 font-mono text-[10px]'>Vector RAG</span>
+          <span className='rounded border border-border/70 bg-card px-1.5 py-0.5 font-mono text-[10px]'>arXiv MCP</span>
+          <span className='rounded border border-border/70 bg-card px-1.5 py-0.5 font-mono text-[10px]'>Git Notes</span>
+          <span className='rounded border border-border/70 bg-card px-1.5 py-0.5 font-mono text-[10px]'>Wikipedia</span>
         </div>
 
         <div className='ml-auto flex items-center gap-1.5'>
@@ -548,45 +593,82 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
       <footer className='shrink-0 border-t border-border/70 p-3 sm:p-4'>
         <div className='mx-auto w-full max-w-3xl space-y-3'>
           {documents.length > 0 && (
-            <div className='flex flex-wrap items-center gap-1.5'>
-              <span className='mr-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground'>
-                Scope
-              </span>
-              {documents.map((doc) => {
-                const isSelected = selectedDocumentId === doc.id;
-                const isReady = doc.status === 'ready';
-                return (
+            <div className='flex flex-col gap-1.5'>
+              <div className='flex items-center justify-between'>
+                <button
+                  type='button'
+                  onClick={() => setScopeExpanded((prev) => !prev)}
+                  className='inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground'
+                  aria-expanded={scopeExpanded}
+                  data-testid='scope-toggle-btn'
+                >
+                  <span>Scope</span>
+                  {selectedDocumentId ? (
+                    <Badge variant='outline' className='h-4 gap-1 px-1.5 text-[10px] font-normal normal-case'>
+                      <span className='size-1.5 rounded-full bg-success' />
+                      {documents.find((d) => d.id === selectedDocumentId)?.name || '1 document'}
+                    </Badge>
+                  ) : (
+                    <span className='text-[10px] font-normal lowercase text-muted-foreground'>
+                      (all documents)
+                    </span>
+                  )}
+                  {scopeExpanded ? (
+                    <ChevronUp className='size-3 text-muted-foreground' />
+                  ) : (
+                    <ChevronDown className='size-3 text-muted-foreground' />
+                  )}
+                </button>
+                {selectedDocumentId && (
                   <button
-                    key={doc.id}
                     type='button'
-                    onClick={() => handleDocumentSelect(doc.id)}
-                    disabled={!isReady}
-                    title={isReady ? `Scope answers to ${doc.name}` : `${doc.name} is ${doc.status}`}
-                    className={cn(
-                      'inline-flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors',
-                      isSelected
-                        ? 'border-foreground/20 bg-foreground text-background'
-                        : 'border-border/70 bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground',
-                      !isReady && 'cursor-not-allowed opacity-50'
-                    )}
+                    onClick={() => handleDocumentSelect(null)}
+                    className='text-[10px] text-muted-foreground transition-colors hover:text-foreground'
                   >
-                    <span
-                      className={cn(
-                        'size-1.5 shrink-0 rounded-full',
-                        isReady ? 'bg-success' : doc.status === 'error' ? 'bg-destructive' : 'bg-warning'
-                      )}
-                      aria-hidden
-                    />
-                    <FileText className='size-3 shrink-0' />
-                    <span className='truncate'>{doc.name}</span>
+                    Clear scope
                   </button>
-                );
-              })}
+                )}
+              </div>
+
+              {scopeExpanded && (
+                <div className='flex flex-wrap items-center gap-1.5 pt-0.5'>
+                  {documents.map((doc) => {
+                    const isSelected = selectedDocumentId === doc.id;
+                    const isReady = doc.status === 'ready';
+                    return (
+                      <button
+                        key={doc.id}
+                        type='button'
+                        onClick={() => handleDocumentSelect(doc.id)}
+                        disabled={!isReady}
+                        title={isReady ? `Scope answers to ${doc.name}` : `${doc.name} is ${doc.status}`}
+                        className={cn(
+                          'inline-flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors',
+                          isSelected
+                            ? 'border-foreground/20 bg-foreground text-background'
+                            : 'border-border/70 bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground',
+                          !isReady && 'cursor-not-allowed opacity-50'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'size-1.5 shrink-0 rounded-full',
+                            isReady ? 'bg-success' : doc.status === 'error' ? 'bg-destructive' : 'bg-warning'
+                          )}
+                          aria-hidden
+                        />
+                        <FileText className='size-3 shrink-0' />
+                        <span className='truncate'>{doc.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
           {lastMessageCitations && lastMessageCitations.length > 0 && (
-            <SourcePanel citations={lastMessageCitations} className='w-full' />
+            <SourcePanel citations={lastMessageCitations} className='w-full' defaultExpanded={false} />
           )}
 
           <ChatComposer onSend={handleSend} isLoading={isLoading} />

@@ -1,7 +1,7 @@
 // Safe mathematical expression parser
 // Only supports basic arithmetic operations with numbers and parentheses
 
-type ExpressionResult = {
+export type ExpressionResult = {
   value: number;
   expression: string;
 };

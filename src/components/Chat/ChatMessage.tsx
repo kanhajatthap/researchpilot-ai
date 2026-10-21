@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import type { Citation, Message } from '@/types/chat';
 import { Check, Copy, FileText, Sparkles, User } from 'lucide-react';
 import { RenderedMessage } from './RenderedMessage';
+import { AgentStepAccordion } from './AgentStepAccordion';
 
 export interface ChatMessageProps {
   message: Message;
@@ -91,6 +92,13 @@ export function ChatMessage({
             {copied ? <Check className='text-success' /> : <Copy />}
           </Button>
         </div>
+
+        {isAssistant && message.agentTrace && (
+          <AgentStepAccordion
+            trace={message.agentTrace}
+            defaultExpanded={isStreaming}
+          />
+        )}
 
         <div className='text-sm leading-relaxed text-foreground/90'>
           <RenderedMessage

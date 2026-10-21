@@ -43,3 +43,10 @@ next-env.d.ts
 # runtime data (local vector store + uploaded document files) - not source
 /data/chroma/
 /data/documents/files/
+
+# screenshots and test logs
+*.png
+.playwright-mcp/
+buildlogs.yml
+deploy-error.yml
+deploys.yml

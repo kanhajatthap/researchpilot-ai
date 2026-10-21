@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { Document, DocumentChunk, StatusTransition } from '@/types/document';
+import type { Document, DocumentChunk } from '@/types/document';
 import { getStorageConfig } from '@/lib/storage/config';
 import { readStateRow, withStateRow, writeStateRow } from '@/lib/storage/postgres';
 import { createFileStore, type FileStore } from '@/lib/storage/file-store';
@@ -232,6 +232,7 @@ async function writeStore(state: StoreState): Promise<void> {
 
 function stripInternal(doc: DocumentRecord): Document {
   const { chunks: _chunks, ...rest } = doc;
+  void _chunks;
   return rest;
 }
 

@@ -33,7 +33,6 @@ describe('Document Processing Flow', () => {
   it('should create document, process it, and mark as ready', async () => {
     // Import after setting env vars
     const { documentStore } = await import('@/lib/rag/document-store');
-    const { vectorStore } = await import('@/lib/rag/vectorstore');
     
     // Create a mock document with initial status
     const mockDocument = {

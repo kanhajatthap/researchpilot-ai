@@ -1,40 +1,63 @@
 {
   "documents": {
-    "6981f4f4-ef0c-42e9-a4c6-6760e6e954d4": {
+    "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e": {
+      "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
       "name": "tsla-20241231-gen",
       "fileName": "tsla-20241231-gen.pdf",
       "fileType": "pdf",
       "size": 1720174,
-      "status": "processing",
-      "uploadedAt": "2026-10-14T12:49:11.308Z",
-      "id": "6981f4f4-ef0c-42e9-a4c6-6760e6e954d4"
-    },
-    "5cdbdf47-6469-4cb0-821c-c9ccbab981e2": {
-      "name": "tsla-20241231-gen",
-      "fileName": "tsla-20241231-gen.pdf",
-      "fileType": "pdf",
-      "size": 1720174,
-      "status": "processing",
-      "uploadedAt": "2026-10-15T04:51:55.931Z",
-      "id": "5cdbdf47-6469-4cb0-821c-c9ccbab981e2"
-    },
-    "6b1c0a46-da7a-435c-b92d-e1e45cefd592": {
-      "name": "Holiday Calendar 2026",
-      "fileName": "Holiday Calendar 2026.pdf",
-      "fileType": "pdf",
-      "size": 426925,
-      "status": "processing",
-      "uploadedAt": "2026-10-15T11:36:05.354Z",
-      "id": "6b1c0a46-da7a-435c-b92d-e1e45cefd592"
-    },
-    "08028bf5-c230-4ded-af9f-7ca94bb64819": {
-      "name": "Holiday Calendar 2026",
-      "fileName": "Holiday Calendar 2026.pdf",
-      "fileType": "pdf",
-      "size": 426925,
-      "status": "processing",
-      "uploadedAt": "2026-10-15T11:36:12.930Z",
-      "id": "08028bf5-c230-4ded-af9f-7ca94bb64819"
+      "status": "ready",
+      "uploadedAt": "2026-10-21T07:48:11.547Z",
+      "contentHash": "2957d89daa2066035df5cf56f3586dd3c25a20a8e366fcf4da866e7e48c1a504",
+      "attemptId": "b7b203cf-918b-4947-920b-53ac92a8b7ab",
+      "lastActivityAt": "2026-10-21T09:14:39.250Z",
+      "statusHistory": [
+        {
+          "status": "queued",
+          "timestamp": "2026-10-21T07:48:11.547Z",
+          "attemptId": "35687fd9-3ed3-48d1-a7fd-4514fff1f925"
+        },
+        {
+          "status": "processing",
+          "timestamp": "2026-10-21T07:48:11.559Z",
+          "attemptId": "35687fd9-3ed3-48d1-a7fd-4514fff1f925"
+        },
+        {
+          "status": "error",
+          "timestamp": "2026-10-21T07:58:11.574Z",
+          "attemptId": "35687fd9-3ed3-48d1-a7fd-4514fff1f925",
+          "error": "Failed to process document: Processing timed out during stage \"embed\" after 596528ms."
+        },
+        {
+          "status": "queued",
+          "timestamp": "2026-10-21T08:09:25.036Z",
+          "attemptId": "2ebbc03e-0861-4baa-9a46-1e668678cdab"
+        },
+        {
+          "status": "processing",
+          "timestamp": "2026-10-21T08:09:25.077Z",
+          "attemptId": "2ebbc03e-0861-4baa-9a46-1e668678cdab"
+        },
+        {
+          "status": "error",
+          "timestamp": "2026-10-21T08:12:34.033Z",
+          "attemptId": "2ebbc03e-0861-4baa-9a46-1e668678cdab",
+          "error": "Failed to process document: Embedding provider daily quota exceeded (HTTP 429). Resets in ~23h. The document can be retried after the quota resets."
+        },
+        {
+          "status": "queued",
+          "timestamp": "2026-10-21T09:06:28.684Z",
+          "attemptId": "b7b203cf-918b-4947-920b-53ac92a8b7ab"
+        },
+        {
+          "status": "ready",
+          "timestamp": "2026-10-21T09:14:48.082Z",
+          "attemptId": "b7b203cf-918b-4947-920b-53ac92a8b7ab"
+        }
+      ],
+      "filePath": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_tsla-20241231-gen.pdf",
+      "chunkCount": 498,
+      "pageCount": 144
     }
   }
 }

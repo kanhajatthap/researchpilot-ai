@@ -29,15 +29,25 @@ vi.mock('@/lib/rag/embedder', () => ({
     embedBatch = mocks.embedBatch;
   },
 }));
-vi.mock('@/lib/rag/vectorstore', () => ({
-  vectorStore: {
-    addChunks: mocks.addChunks,
-    deleteDocument: mocks.deleteDocument,
-    listDocumentIds: mocks.listDocumentIds,
-    countDocumentChunks: mocks.countDocumentChunks,
-    query: mocks.query,
-  },
-}));
+vi.mock('@/lib/rag/vectorstore', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/rag/vectorstore')>();
+  return {
+    vectorStore: {
+      addChunks: mocks.addChunks,
+      deleteDocument: mocks.deleteDocument,
+      listDocumentIds: mocks.listDocumentIds,
+      countDocumentChunks: mocks.countDocumentChunks,
+      query: mocks.query,
+    },
+    // Real purge logic + messages, driven by the mocked store.
+    purgeDocumentVectors: (documentId: string) =>
+      actual.purgeDocumentVectors(documentId, {
+        deleteDocument: mocks.deleteDocument,
+        listDocumentIds: mocks.listDocumentIds,
+      }),
+    vectorPurgeFailureMessages: actual.vectorPurgeFailureMessages,
+  };
+});
 
 let storeDir: string;
 

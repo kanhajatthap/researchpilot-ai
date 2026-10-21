@@ -1,6 +1,15 @@
 import { ToolCall } from '@/types/chat';
 
-export type ToolName = 'search' | 'calculator' | 'web_search';
+export type ToolName =
+  | 'search'
+  | 'search_documents'
+  | 'calculator'
+  | 'web_search'
+  | 'list_documents'
+  | 'search_arxiv'
+  | 'git_save_notes'
+  | 'git_status'
+  | 'git_notes_history';
 
 export interface ToolDefinition {
   name: ToolName;

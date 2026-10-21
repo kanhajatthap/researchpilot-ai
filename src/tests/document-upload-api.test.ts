@@ -30,15 +30,26 @@ vi.mock('@/lib/rag/embedder', () => ({
     embedBatch = mocks.embedBatch;
   },
 }));
-vi.mock('@/lib/rag/vectorstore', () => ({
-  vectorStore: {
-    addChunks: mocks.addChunks,
-    deleteDocument: mocks.deleteDocument,
-    listDocumentIds: mocks.listDocumentIds,
-    countDocumentChunks: mocks.countDocumentChunks,
-    query: mocks.query,
-  },
-}));
+vi.mock('@/lib/rag/vectorstore', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/rag/vectorstore')>();
+  return {
+    vectorStore: {
+      addChunks: mocks.addChunks,
+      deleteDocument: mocks.deleteDocument,
+      listDocumentIds: mocks.listDocumentIds,
+      countDocumentChunks: mocks.countDocumentChunks,
+      query: mocks.query,
+    },
+    // Real purge logic + messages, driven by the mocked store: the routes'
+    // cleanup-invariant code path is what these tests must exercise.
+    purgeDocumentVectors: (documentId: string) =>
+      actual.purgeDocumentVectors(documentId, {
+        deleteDocument: mocks.deleteDocument,
+        listDocumentIds: mocks.listDocumentIds,
+      }),
+    vectorPurgeFailureMessages: actual.vectorPurgeFailureMessages,
+  };
+});
 
 let storeDir: string;
 
@@ -330,5 +341,108 @@ describe('POST /api/documents', () => {
     const res = await upload(file);
     expect(res.status).toBe(409);
     expect(await listDocuments()).toHaveLength(1);
+  });
+
+  it('reprocesses on re-upload of identical content that failed before (no stale error replay)', async () => {
+    // First attempt fails (e.g. daily quota exhaustion at the time).
+    mocks.embedBatch.mockRejectedValue(
+      new Error('Embedding provider daily quota exceeded (HTTP 429). Resets in ~13h.'),
+    );
+    const first = await upload(makePdf('identical-failed-bytes'));
+    expect(first.status).toBe(500);
+    const afterFirst = await listDocuments();
+    expect(afterFirst).toHaveLength(1);
+    expect(afterFirst[0].status).toBe('error');
+
+    // Quota window has reset; the same bytes are uploaded again.
+    mocks.embedBatch.mockImplementation(async (texts: string[]) => texts.map(() => [0.1, 0.2, 0.3]));
+    const second = await upload(makePdf('identical-failed-bytes'));
+    const body = await second.json();
+
+    // Fresh attempt, not a replay of the cached error and not a "already
+    // processed" no-op.
+    expect(second.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.adopted).toBe(true);
+    expect(body.documentId).toBe(afterFirst[0].id);
+
+    const docs = await listDocuments();
+    expect(docs).toHaveLength(1); // no duplicate record
+    expect(docs[0].status).toBe('ready');
+    expect(docs[0].error).toBeUndefined();
+    expect(docs[0].attemptId).not.toBe(afterFirst[0].attemptId);
+    expect(mocks.embedBatch).toHaveBeenCalledTimes(2); // really re-embedded
+
+    // Stale vectors from any previous attempt are purged before re-adding.
+    expect(mocks.deleteDocument).toHaveBeenCalledWith(afterFirst[0].id);
+    const deleteOrder = mocks.deleteDocument.mock.invocationCallOrder[0];
+    const addOrder = mocks.addChunks.mock.invocationCallOrder[0];
+    expect(deleteOrder).toBeLessThan(addOrder!);
+  });
+
+  it('fails fast with a fresh retryable error when quota is still exhausted on re-upload', async () => {
+    const quotaMessage =
+      'Embedding provider daily quota exceeded (HTTP 429). Resets in ~13h.';
+    mocks.embedBatch.mockRejectedValue(new Error(quotaMessage));
+
+    const first = await upload(makePdf('still-quoted-bytes'));
+    expect(first.status).toBe(500);
+    const original = (await listDocuments())[0];
+
+    // Re-upload while the quota window is still open: must attempt again,
+    // record a terminal (retryable) error, and never cache-succeed.
+    const second = await upload(makePdf('still-quoted-bytes'));
+    const body = await second.json();
+    expect(second.status).toBe(500);
+    expect(body.error).toMatch(/quota exceeded/i);
+
+    const docs = await listDocuments();
+    expect(docs).toHaveLength(1);
+    expect(docs[0].id).toBe(original.id);
+    expect(docs[0].status).toBe('error'); // terminal — never stuck in processing
+    expect(docs[0].error).toMatch(/quota/i);
+    expect(mocks.embedBatch).toHaveBeenCalledTimes(2); // fresh attempt did run
+  });
+
+  it('blocks adopt-reprocessing when purging stale vectors fails', async () => {
+    mocks.embedBatch.mockRejectedValue(new Error('first attempt failed'));
+    const first = await upload(makePdf('purge-blocked-bytes'));
+    expect(first.status).toBe(500);
+    mocks.embedBatch.mockClear();
+    mocks.deleteDocument.mockRejectedValue(new Error('Vector store unavailable'));
+
+    const res = await upload(makePdf('purge-blocked-bytes'));
+    const body = await res.json();
+    expect(res.status).toBe(500);
+    expect(body.error).toMatch(/cleanup failed/i);
+
+    // No embedding may start while old vectors might still exist.
+    expect(mocks.embedBatch).not.toHaveBeenCalled();
+    expect(mocks.addChunks).not.toHaveBeenCalled();
+
+    const docs = await listDocuments();
+    expect(docs).toHaveLength(1);
+    expect(docs[0].status).toBe('error'); // terminal + retriable, not processing
+    expect(docs[0].error).toMatch(/cleanup failed/i);
+  });
+
+  it('blocks adopt-reprocessing when stale vectors remain after cleanup', async () => {
+    mocks.embedBatch.mockRejectedValue(new Error('first attempt failed'));
+    const first = await upload(makePdf('verify-blocked-bytes'));
+    expect(first.status).toBe(500);
+    const docId = (await listDocuments())[0].id;
+    mocks.embedBatch.mockClear();
+    mocks.listDocumentIds.mockResolvedValue([docId]);
+
+    const res = await upload(makePdf('verify-blocked-bytes'));
+    const body = await res.json();
+    expect(res.status).toBe(500);
+    expect(body.error).toMatch(/verification failed/i);
+    expect(mocks.embedBatch).not.toHaveBeenCalled();
+
+    const docs = await listDocuments();
+    expect(docs).toHaveLength(1);
+    expect(docs[0].status).toBe('error');
+    expect(docs[0].error).toMatch(/verification failed/i);
   });
 });

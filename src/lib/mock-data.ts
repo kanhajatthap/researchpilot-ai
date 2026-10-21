@@ -24,10 +24,10 @@ export const mockAgentSteps: AgentStep[] = [
   { id: 'step-6', label: 'Response generated', status: 'completed', timestamp: new Date(), message: 'Answer synthesized' },
 ];
 export const suggestedQuestions = [
-  'Compare Tesla revenue across two years',
-  'Summarize the key findings in a report',
-  'Find risks mentioned in the documents',
-  'Calculate year-over-year growth',
-  'What was Apple\u2019s revenue in 2025?',
+  'Search arXiv for recent papers on multimodal AI',
+  'Summarize the key findings in the uploaded paper',
+  'Calculate statistical differences and percentage gain',
+  'Save literature review and research notes to Git',
+  'Find core contributions and risks in the documents',
 ];
 

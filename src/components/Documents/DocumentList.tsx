@@ -45,6 +45,20 @@ export function DocumentList({ className }: DocumentListProps) {
     };
   }, [fetchDocuments]);
 
+  useEffect(() => {
+    // Auto-poll while any document is in an active processing or queued state
+    const hasActive = documents.some(
+      (d) => d.status === 'processing' || d.status === 'queued' || d.status === 'uploading'
+    );
+    if (!hasActive) return;
+
+    const intervalId = setInterval(() => {
+      fetchDocuments();
+    }, 3500);
+
+    return () => clearInterval(intervalId);
+  }, [documents, fetchDocuments]);
+
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
     setActionError(null);

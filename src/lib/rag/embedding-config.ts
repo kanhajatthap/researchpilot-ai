@@ -45,8 +45,8 @@ export const DEFAULT_EMBEDDING_CONTENTS_PER_MINUTE = 0;
 /** Sliding-window size used by the embedding rate limiter. */
 export const DEFAULT_EMBEDDING_RATE_LIMIT_WINDOW_MS = 60_000;
 
-/** Default overall per-document processing timeout (ms). */
-export const DEFAULT_PROCESSING_TIMEOUT_MS = 5 * 60 * 1000;
+/** Default overall per-document processing timeout (ms). 25 minutes to accommodate large PDFs on free-tier rate limits. */
+export const DEFAULT_PROCESSING_TIMEOUT_MS = 25 * 60 * 1000;
 
 /**
  * Optional proactive pacing limit, from `EMBEDDINGS_CONTENTS_PER_MINUTE`.

@@ -313,3 +313,77 @@ class VectorStore {
 }
 
 export const vectorStore = new VectorStore();
+
+/** Result of {@link purgeDocumentVectors}: either clean, or why it can't be trusted. */
+export type VectorPurgeResult =
+  | { ok: true }
+  | { ok: false; reason: 'cleanup-failed' | 'verification-failed'; detail: string };
+
+/**
+ * Delete every stored vector for a document and verify it is gone.
+ *
+ * Reprocessing must never start while vectors from a previous attempt could
+ * still exist: stale chunks would mix with (or block) the new ones. Shared by
+ * the retry endpoint and the re-upload (adopt) path so both enforce the same
+ * invariant, with the same user-facing messages.
+ *
+ * Never throws: any failure is returned so callers can persist it and refuse
+ * to start reprocessing (the document stays in a terminal, retryable state).
+ *
+ * `store` exists for tests (route suites mock the vector store module, which
+ * would otherwise bypass this shared logic); production callers use the default.
+ */
+export async function purgeDocumentVectors(
+  documentId: string,
+  store: {
+    deleteDocument(documentId: string): Promise<void>;
+    listDocumentIds(): Promise<string[]>;
+  } = vectorStore,
+): Promise<VectorPurgeResult> {
+  try {
+    await store.deleteDocument(documentId);
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'cleanup-failed',
+      detail: error instanceof Error ? error.message : String(error),
+    };
+  }
+  try {
+    const remainingIds = await store.listDocumentIds();
+    if (remainingIds.includes(documentId)) {
+      return {
+        ok: false,
+        reason: 'verification-failed',
+        detail: 'document still has stored vectors after cleanup',
+      };
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'verification-failed',
+      detail: error instanceof Error ? error.message : String(error),
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * User-facing messages for a failed purge: what to persist on the document
+ * record, and what to return from the API.
+ */
+export function vectorPurgeFailureMessages(failure: {
+  reason: 'cleanup-failed' | 'verification-failed';
+  detail: string;
+}): { record: string; response: string } {
+  if (failure.reason === 'cleanup-failed') {
+    return {
+      record: `Vector cleanup failed before reprocessing: ${failure.detail}`,
+      response: 'Vector cleanup failed — cannot start reprocessing safely.',
+    };
+  }
+  return {
+    record: `Vector cleanup verification failed: ${failure.detail}`,
+    response: 'Vector cleanup verification failed — cannot start reprocessing safely.',
+  };
+}

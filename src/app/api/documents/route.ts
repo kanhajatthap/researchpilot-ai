@@ -12,6 +12,7 @@ import {
   resolveProcessingTimeoutMs,
 } from '@/lib/rag/embedding-config';
 import { createHash } from 'crypto';
+import { purgeDocumentVectors, vectorPurgeFailureMessages } from '@/lib/rag/vectorstore';
 
 export const runtime = 'nodejs';
 
@@ -113,6 +114,23 @@ export async function POST(req: NextRequest) {
         documentId: doc.id,
         error: 'Document was superseded by another operation',
       }, { status: 409 });
+    }
+
+    // Reprocessing an adopted (previously failed) record: purge any vectors a
+    // previous attempt may have left behind first — exactly like the retry
+    // endpoint — so stale or partial vectors can never mix with, or block,
+    // the new ones. A cleanup failure stops reprocessing (terminal + retriable).
+    if (resolved.kind === 'adopt') {
+      const purge = await purgeDocumentVectors(doc.id);
+      if (!purge.ok) {
+        const messages = vectorPurgeFailureMessages(purge);
+        await documentStore.markFailedIfAttempt(doc.id, messages.record, attemptId);
+        console.error(`[upload] vector purge failed document=${doc.id} attempt=${attemptId}: ${messages.record}`);
+        return NextResponse.json(
+          { error: messages.response, documentId: doc.id },
+          { status: 500 },
+        );
+      }
     }
 
     // Delegate the full processing pipeline to the shared processor.

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createGeminiClient, toGeminiContents } from '@/lib/llm/gemini';
+import { createGeminiClient } from '@/lib/llm/gemini';
 import { getServerEnv } from '@/lib/config';
-import { generateQueryEmbedding, retrieveChunks, constructRagPrompt, validateCitations } from '@/lib/rag/retrieval';
 import { agentManager } from '@/lib/agents';
+import { runAgent } from '@/lib/agents/agent-runner';
 import { getConversation, updateConversation, getConversationIdFromRequest } from '@/lib/rag/conversation-store.server';
-import { generateTitleFromMessage } from '@/lib/rag/title-generator';
-import { validateMessages, buildContextPrompt, type IncomingMessage } from '@/lib/rag/chat-utils';
+import { validateMessages, type IncomingMessage } from '@/lib/rag/chat-utils';
 import type { Message, Citation, Conversation } from '@/types/chat';
 
 export const runtime = 'nodejs';
@@ -94,8 +93,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Create an agent for this chat session
-  const chatAgent = agentManager.createAgent(
+  // Create an agent record for this chat session
+  agentManager.createAgent(
     `chat-${conversationId}`,
     'Chat Research Agent',
     { documentId, messages, conversationId }
@@ -104,87 +103,39 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enqueue = (payload: Record<string, unknown>) => {
-        controller.enqueue(encoder.encode(sse(payload)));
+        try {
+          controller.enqueue(encoder.encode(sse(payload)));
+        } catch {
+          // Stream controller may be closed if client disconnected
+        }
       };
-
       try {
-        let citations: Array<{
-          documentId: string;
-          documentName: string;
-          pageNumber?: number;
-          chunkId: string;
-        }> = [];
-
-        // Build the content for the LLM with conversation context
-        let geminiContents = toGeminiContents(messages);
-
-        // If we have an existing conversation, add context to help resolve references
-        if (existingConversation && existingConversation.messages.length > 0) {
-          const contextPrompt = buildContextPrompt(existingConversation, lastMessage.content);
-          // Replace the last user message with context-enhanced version
-          const contextMessages = [...messages.slice(0, -1), {
-            role: 'user' as const,
-            content: contextPrompt,
-          }];
-          geminiContents = toGeminiContents(contextMessages);
-        }
-
-        if (documentId) {
-          const userMessage = messages[messages.length - 1];
-          if (userMessage.role === 'user') {
-            // Generate query embedding
-            const queryEmbedding = await generateQueryEmbedding(userMessage.content);
-
-            // Retrieve relevant chunks
-            const retrievalResult = await retrieveChunks(queryEmbedding, 5, documentId);
-
-            // Validate document exists and is ready
-            const chunks = retrievalResult.chunks;
-            if (chunks.length > 0) {
-              // Construct RAG prompt and citations
-              const { prompt, citations: ragCitations } = constructRagPrompt(userMessage.content, retrievalResult);
-
-              // Validate citations against retrieved chunks
-              const validatedCitations = validateCitations(ragCitations, retrievalResult.chunks);
-
-              // Update citations with validated ones
-              citations = validatedCitations.map(c => ({
-                documentId: c.documentId,
-                documentName: c.documentName,
-                pageNumber: c.pageNumber,
-                chunkId: c.chunkId,
-              }));
-
-              // Replace the last user message with the RAG-enhanced prompt
-              const ragMessages = [...messages.slice(0, messages.length - 1), {
-                role: 'user' as const,
-                content: prompt,
-              }];
-              geminiContents = toGeminiContents(ragMessages);
-            }
-          }
-        }
-
-        const response = await gemini.models.generateContentStream({
+        // Execute the autonomous agent loop
+        const agentResult = await runAgent({
+          gemini,
           model: geminiModel,
-          contents: geminiContents,
+          messages,
+          documentId,
+          existingConversation,
+          onTraceUpdate(steps) {
+            enqueue({ trace: steps });
+          },
+          onTextChunk(text) {
+            enqueue({ text });
+          },
         });
 
-        let fullResponse = '';
-        for await (const chunk of response) {
-          const text = chunk.text;
-          if (text && text.length > 0) {
-            fullResponse += text;
-            enqueue({ text });
-          }
-        }
+        const fullResponse = agentResult.fullResponse;
+        const citations = agentResult.citations;
 
-        // Send final metadata with citations (no fake agent trace)
-        if (citations.length > 0) {
-          enqueue({ citations, done: true, conversationId });
-        } else {
-          enqueue({ done: true, conversationId });
-        }
+        // Send final metadata with citations, complete trace, and finalText safety net
+        enqueue({
+          finalText: fullResponse,
+          citations: citations.length > 0 ? citations : undefined,
+          done: true,
+          conversationId,
+          trace: agentResult.trace.steps,
+        });
 
         // Persist the conversation
         const userMsg: Message = {
@@ -208,6 +159,7 @@ export async function POST(req: NextRequest) {
           role: 'assistant',
           content: fullResponse,
           citations: assistantCitations.length > 0 ? assistantCitations : undefined,
+          agentTrace: agentResult.trace,
           createdAt: new Date(),
         };
 
@@ -219,8 +171,16 @@ export async function POST(req: NextRequest) {
         await updateConversation(conversationId, allMessages);
 
       } catch (error) {
-        console.error('[api/chat] stream error:', errorMessage(error, 'Unknown error'));
-        enqueue({ error: 'The assistant could not complete the response. Please try again.' });
+        const errorStr = errorMessage(error, 'Unknown error');
+        console.error('[api/chat] stream error:', errorStr);
+        const isQuota =
+          errorStr.includes('429') ||
+          errorStr.toLowerCase().includes('quota') ||
+          errorStr.toLowerCase().includes('rate limit');
+        const userFacing = isQuota
+          ? 'Gemini free-tier rate limit reached (5 requests/minute). Please wait ~15-20 seconds and try again.'
+          : 'The assistant could not complete the response. Please try again.';
+        enqueue({ error: userFacing });
       } finally {
         controller.close();
       }

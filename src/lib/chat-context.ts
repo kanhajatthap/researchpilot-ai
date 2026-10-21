@@ -29,7 +29,7 @@ export function useConversationStore() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [selectedConversationId, setSelectedConversationIdState] = useState<string>('');
   const [loadingConversations, setLoadingConversations] = useState<boolean>(false);
-  const [loadingConversation, setLoadingConversation] = useState<boolean>(false);
+  const [loadingConversation] = useState<boolean>(false);
 
   /**
    * Load the list of conversations from the API.

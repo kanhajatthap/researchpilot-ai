@@ -29,12 +29,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ d
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
 
-  // Check if document is currently processing - should not delete while processing
-  const doc = await documentStore.get(documentId);
+  // Check if document is currently actively processing (<90s since last heartbeat)
+  const doc = await documentStore.getRecord(documentId);
   if (doc?.status === 'processing') {
-    return NextResponse.json({ 
-      error: 'Cannot delete document while it is processing. Wait for it to complete or mark as failed first.',
-    }, { status: 409 });
+    const lastActivity = doc.lastActivityAt ? Date.parse(doc.lastActivityAt) : 0;
+    const isLive = Date.now() - lastActivity < 90_000;
+    if (isLive) {
+      return NextResponse.json({ 
+        error: 'Cannot delete document while it is actively processing. Wait for it to complete or try again in a moment.',
+      }, { status: 409 });
+    }
   }
 
   try {
