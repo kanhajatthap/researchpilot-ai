@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
    *
    * `chromadb` is a server-only HTTP client and is safest left unbundled too.
    */
-  serverExternalPackages: ["pdfjs-dist", "chromadb"],
+  serverExternalPackages: ["pdfjs-dist", "chromadb", "pg"],
 };
 
 export default nextConfig;

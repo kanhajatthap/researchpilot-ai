@@ -10,11 +10,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "migrate:storage": "node scripts/migrate-storage.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@google/genai": "^2.28.0",
+    "@vercel/blob": "^2.8.2",
     "@xenova/transformers": "^2.17.2",
     "chromadb": "^3.5.0",
     "class-variance-authority": "^0.7.1",
@@ -24,6 +26,7 @@
     "lucide-react": "^1.53.0",
     "next": "16.3.6",
     "pdfjs-dist": "^6.4.299",
+    "pg": "^8.23.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-markdown": "^10.1.0",
@@ -39,6 +42,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

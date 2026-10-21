@@ -2,6 +2,9 @@ import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { Document, DocumentChunk, StatusTransition } from '@/types/document';
+import { getStorageConfig } from '@/lib/storage/config';
+import { readStateRow, withStateRow, writeStateRow } from '@/lib/storage/postgres';
+import { createFileStore, type FileStore } from '@/lib/storage/file-store';
 
 /**
  * Local file-based storage for document metadata and chunk manifest.
@@ -43,6 +46,10 @@ let inMemory: StoreState | null = null;
  */
 let mutationChain: Promise<unknown> = Promise.resolve();
 
+/**
+ * Serialize in-process mutations (filesystem driver). Postgres uses a row lock
+ * inside `mutateStore` instead.
+ */
 function withStoreLock<T>(fn: () => Promise<T>): Promise<T> {
   const result = mutationChain.then(fn);
   mutationChain = result.then(
@@ -52,9 +59,46 @@ function withStoreLock<T>(fn: () => Promise<T>): Promise<T> {
   return result;
 }
 
+/**
+ * Atomic read-modify-write for one document-store mutation. The callback
+ * receives the current state, mutates it in place (or reassigns records), and
+ * returns the caller-facing result; persistence is handled here.
+ */
+function mutateStore<T>(fn: (state: StoreState) => Promise<T> | T): Promise<T> {
+  if (isPostgresDriver()) {
+    return withStateRow<StoreState, T>(POSTGRES_KEY, async (current) => {
+      const state = current ? normalizeState(current) : { documents: {} };
+      const result = await fn(state);
+      return { value: state, result };
+    });
+  }
+  return withStoreLock(async () => {
+    const state = await readStore();
+    const result = await fn(state);
+    await writeStore(state);
+    return result;
+  });
+}
+
 function dataDir(): string {
   // Prefer explicit override from env so tests can point at a temp dir.
   return process.env.DOCUMENT_STORE_PATH || path.join(process.cwd(), 'data', 'documents');
+}
+
+const POSTGRES_KEY = 'documents';
+
+function isPostgresDriver(): boolean {
+  return getStorageConfig().driver === 'vercel';
+}
+
+let fileStoreInstance: FileStore | null = null;
+
+/** Uploaded-file store for the configured driver (filesystem or Vercel Blob). */
+function files(): FileStore {
+  if (!fileStoreInstance) {
+    fileStoreInstance = createFileStore(fileDir());
+  }
+  return fileStoreInstance;
 }
 
 function storePath(): string {
@@ -94,7 +138,25 @@ async function readStoreFile(): Promise<string | null> {
   return fs.readFile(target, 'utf-8');
 }
 
+function normalizeState(parsed: StoreState): StoreState {
+  if (!parsed.documents || typeof parsed.documents !== 'object') {
+    parsed.documents = {};
+  }
+  // Re-hydrate Date objects from ISO strings.
+  for (const doc of Object.values(parsed.documents)) {
+    if (typeof doc.uploadedAt === 'string') {
+      doc.uploadedAt = new Date(doc.uploadedAt);
+    }
+  }
+  return parsed;
+}
+
 async function readStore(): Promise<StoreState> {
+  if (isPostgresDriver()) {
+    const stored = await readStateRow<StoreState>(POSTGRES_KEY);
+    return stored ? normalizeState(stored) : { documents: {} };
+  }
+
   if (inMemory) return inMemory;
   const raw = await readStoreFile();
   if (raw === null) {
@@ -112,17 +174,8 @@ async function readStore(): Promise<StoreState> {
       }`,
     );
   }
-  if (!parsed.documents || typeof parsed.documents !== 'object') {
-    parsed.documents = {};
-  }
-  // Re-hydrate Date objects from ISO strings.
-  for (const doc of Object.values(parsed.documents)) {
-    if (typeof doc.uploadedAt === 'string') {
-      doc.uploadedAt = new Date(doc.uploadedAt);
-    }
-  }
-  inMemory = parsed;
-  return parsed;
+  inMemory = normalizeState(parsed);
+  return inMemory;
 }
 
 /**
@@ -135,6 +188,11 @@ async function readStore(): Promise<StoreState> {
  * (the operation is never reported as successful when the write did not land).
  */
 async function writeStore(state: StoreState): Promise<void> {
+  if (isPostgresDriver()) {
+    await writeStateRow(POSTGRES_KEY, state);
+    return;
+  }
+
   inMemory = state;
   const dir = dataDir();
   await fs.mkdir(dir, { recursive: true });
@@ -215,10 +273,41 @@ export interface RecoveryReport {
   remaining: number;
 }
 
+/**
+ * Re-queue a FAILED record for a new processing attempt: fresh attemptId,
+ * error cleared, status `queued`, and a `queued` transition appended.
+ *
+ * Shared by the legacy (no content hash) adoption path and the identical-
+ * content adoption path so both apply exactly the same duplicate policy.
+ * The caller holds the mutation lock and persists the returned state.
+ */
+function adoptFailedRecord(
+  state: StoreState,
+  record: DocumentRecord,
+  contentHash?: string,
+): DocumentRecord {
+  const now = new Date();
+  const attemptId = randomUUID();
+  const history = (record.statusHistory || []).slice();
+  history.push({ status: 'queued', timestamp: now.toISOString(), attemptId });
+  const adopted: DocumentRecord = {
+    ...record,
+    contentHash: contentHash || record.contentHash,
+    status: 'queued',
+    error: undefined,
+    chunkCount: undefined,
+    pageCount: undefined,
+    attemptId,
+    lastActivityAt: now.toISOString(),
+    statusHistory: history,
+  };
+  state.documents[record.id] = adopted;
+  return adopted;
+}
+
 export const documentStore = {
   async create(metadata: Omit<Document, 'id'>): Promise<Document> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const now = new Date();
       const doc: Document = {
         ...metadata,
@@ -230,7 +319,6 @@ export const documentStore = {
         ],
       };
       state.documents[doc.id] = { ...doc };
-      await writeStore(state);
       return doc;
     });
   },
@@ -240,7 +328,10 @@ export const documentStore = {
    * apply a clear duplicate policy:
    *
    *  - Identity is the SHA-256 content hash. Uploading the same bytes again is
-   *    idempotent and returns the existing record (kind: 'existing').
+   *    idempotent and returns the existing record (kind: 'existing'), except
+   *    when the previous attempt FAILED: that record is adopted with a fresh
+   *    attempt (kind: 'adopt') so a re-upload reprocesses instead of replaying
+   *    a stale failure (e.g. a daily-quota error whose window has reset).
    *  - A legacy record (created before content hashing existed) that matches on
    *    file name + size but has no hash is *adopted* when it previously failed:
    *    the new upload's content and file replace its stale state, reusing the
@@ -257,14 +348,22 @@ export const documentStore = {
     size: number;
     contentHash: string;
   }): Promise<{ kind: 'create' | 'adopt' | 'existing'; doc: Document }> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const records = Object.values(state.documents);
 
       // 1. Strongest identity: identical content.
       if (input.contentHash) {
         const byHash = records.find((d) => d.contentHash === input.contentHash);
-        if (byHash) return { kind: 'existing' as const, doc: stripInternal(byHash) };
+        if (byHash) {
+          if (byHash.status !== 'error') {
+            return { kind: 'existing' as const, doc: stripInternal(byHash) };
+          }
+          // Identical content that failed earlier: adopt it with a fresh
+          // attempt so a re-upload reprocesses instead of replaying a stale
+          // failure (which may come from a quota window that has since reset).
+          const adopted = adoptFailedRecord(state, byHash, input.contentHash);
+          return { kind: 'adopt' as const, doc: stripInternal(adopted) };
+        }
       }
 
       // 2. Legacy fallback: same name + size, no content hash recorded.
@@ -279,23 +378,7 @@ export const documentStore = {
           return { kind: 'existing' as const, doc: stripInternal(legacy) };
         }
         // Adopt the failed legacy record: reuse its id, claim a fresh attempt.
-        const now = new Date();
-        const attemptId = randomUUID();
-        const history = (legacy.statusHistory || []).slice();
-        history.push({ status: 'queued', timestamp: now.toISOString(), attemptId });
-        const adopted: DocumentRecord = {
-          ...legacy,
-          contentHash: input.contentHash,
-          status: 'queued',
-          error: undefined,
-          chunkCount: undefined,
-          pageCount: undefined,
-          attemptId,
-          lastActivityAt: now.toISOString(),
-          statusHistory: history,
-        };
-        state.documents[legacy.id] = adopted;
-        await writeStore(state);
+        const adopted = adoptFailedRecord(state, legacy, input.contentHash);
         return { kind: 'adopt' as const, doc: stripInternal(adopted) };
       }
 
@@ -316,19 +399,16 @@ export const documentStore = {
         statusHistory: [{ status: 'queued', timestamp: now.toISOString(), attemptId }],
       };
       state.documents[created.id] = created;
-      await writeStore(state);
       return { kind: 'create' as const, doc: stripInternal(created) };
     });
   },
 
   async update(id: string, patch: Partial<Document>): Promise<Document | null> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const existing = state.documents[id];
       if (!existing) return null;
       const updated = { ...existing, ...patch };
       state.documents[id] = updated;
-      await writeStore(state);
       return updated;
     });
   },
@@ -344,8 +424,7 @@ export const documentStore = {
     patch: Partial<Document>,
     expectedAttemptId: string,
   ): Promise<Document | null> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const existing = state.documents[id];
       if (!existing) return null;
       // Reject unless the caller can prove ownership of the current attempt.
@@ -367,7 +446,6 @@ export const documentStore = {
         updated.statusHistory = history;
       }
       state.documents[id] = updated;
-      await writeStore(state);
       return updated;
     });
   },
@@ -378,14 +456,12 @@ export const documentStore = {
    * Returns null when the attempt is stale (a newer attempt owns the document).
    */
   async touchIfAttempt(id: string, attemptId: string): Promise<Document | null> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const existing = state.documents[id];
       if (!existing) return null;
       if (existing.attemptId !== attemptId) return null;
       existing.lastActivityAt = new Date().toISOString();
       state.documents[id] = existing;
-      await writeStore(state);
       return stripInternal(existing);
     });
   },
@@ -419,62 +495,65 @@ export const documentStore = {
   },
 
   async delete(id: string): Promise<boolean> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       if (!state.documents[id]) return false;
 
       // Remove the stored file if it exists
       const filePath = state.documents[id].filePath;
       if (filePath) {
-        const fullPath = path.join(fileDir(), filePath);
         try {
-          await fs.unlink(fullPath);
+          await files().remove(filePath);
         } catch (e) {
           console.error('File deletion error:', e);
         }
       }
 
       delete state.documents[id];
-      await writeStore(state);
       return true;
     });
   },
 
   /**
-   * Save an uploaded PDF file to disk and return the relative path.
-   * The file is stored under the per-document directory keyed by document ID.
+   * Save an uploaded PDF and return the stored reference.
+   * Filesystem: the file name under `data/documents/files`.
+   * Blob: the private blob URL.
    */
   async saveFile(documentId: string, buffer: Buffer, originalName: string): Promise<string> {
-    const dir = fileDir();
-    await fs.mkdir(dir, { recursive: true });
-    const fileName = `${documentId}_${originalName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    const fullPath = path.join(dir, fileName);
-    await fs.writeFile(fullPath, buffer);
-    return fileName;
+    return files().save(documentId, buffer, originalName);
   },
 
   /**
    * Set the stored file path for a document (internal field).
    */
   async setFilePath(id: string, filePath: string): Promise<Document | null> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const existing = state.documents[id];
       if (!existing) return null;
       existing.filePath = filePath;
       state.documents[id] = existing;
-      await writeStore(state);
       return stripInternal(existing);
     });
   },
 
   /**
-   * Get the absolute path to the stored PDF for a document, if it exists.
+   * Read the stored PDF for a document. Driver-agnostic: works for both the
+   * filesystem and Vercel Blob backends (unlike `getFilePath`, which only
+   * returns a local absolute path).
+   */
+  async readFile(documentId: string): Promise<Buffer | null> {
+    const record = await this.getRecord(documentId);
+    if (!record || !record.filePath) return null;
+    return files().read(record.filePath);
+  },
+
+  /**
+   * Get the absolute local path to the stored PDF, if the filesystem driver is
+   * in use. Returns null for remote (Blob) storage.
    */
   async getFilePath(documentId: string): Promise<string | null> {
     const record = await this.getRecord(documentId);
     if (!record || !record.filePath) return null;
-    return path.join(fileDir(), record.filePath);
+    return files().localPath(record.filePath);
   },
 
   _resetForTests(): void {
@@ -602,8 +681,7 @@ export const documentStore = {
    * concurrent retries cannot both claim the same document.
    */
   async prepareForRetry(id: string): Promise<{ attemptId: string; doc: Document } | null> {
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const existing = state.documents[id];
       if (!existing) return null;
       if (existing.status !== 'error') {
@@ -628,7 +706,6 @@ export const documentStore = {
         statusHistory: history,
       };
       state.documents[id] = updated;
-      await writeStore(state);
       return { attemptId, doc: stripInternal(updated) };
     });
   },
@@ -657,8 +734,7 @@ export const documentStore = {
     const dryRun = options?.dryRun ?? true;
     const minAgeMs = options?.minAgeMs ?? 10 * 60 * 1000;
 
-    return withStoreLock(async () => {
-      const state = await readStore();
+    return mutateStore(async (state) => {
       const now = options?.now ?? Date.now();
       const candidates: RecoveryCandidate[] = [];
 
@@ -706,12 +782,7 @@ export const documentStore = {
         // re-uploaded instead.
         let hasStoredFile = false;
         if (doc.filePath) {
-          try {
-            await fs.access(path.join(fileDir(), doc.filePath));
-            hasStoredFile = true;
-          } catch {
-            hasStoredFile = false;
-          }
+          hasStoredFile = await files().exists(doc.filePath);
         }
         const nextStep = hasStoredFile
           ? 'retry to reprocess.'
@@ -737,7 +808,6 @@ export const documentStore = {
         report.recovered.push({ ...candidate, attemptId: newAttemptId, status: 'error' });
       }
 
-      await writeStore(state);
       report.remaining = 0;
       return report;
     });

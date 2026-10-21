@@ -40,6 +40,38 @@ An Agentic AI Research Assistant powered by RAG, LangChain & LangGraph. This rep
 - Phase 4+ features (RAG, documents, agent tools, memory, reports) are not implemented yet.
 - Tests: run `npm run lint`, `npm run build`, and `npx tsc --noEmit`. If you add tests, run `npm test`.
 
+## Deployment (Vercel)
+
+Set these in **Vercel → Project → Settings → Environment Variables** (Production + Preview):
+
+| Variable | Value | Notes |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | Gemini API key | Required for chat + embeddings |
+| `CHROMA_API_KEY` | Chroma Cloud API key | Enables `CloudClient` |
+| `CHROMA_TENANT` | Chroma Cloud tenant | From the Chroma Cloud dashboard |
+| `CHROMA_DATABASE` | Chroma Cloud database name | e.g. `researchpilot` |
+| `CHROMA_HOST` | `api.trychroma.com` | Defaults to this when `CHROMA_API_KEY` is set |
+| `DATABASE_URL` | Postgres connection string | Vercel Postgres / Neon; stores document + conversation state |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token | Stores uploaded PDFs (private blobs) |
+| `STORAGE_DRIVER` | `vercel` or `fs` | Optional override; auto-detected when Postgres + Blob are set |
+
+Optional: `GEMINI_MODEL`, `EMBEDDINGS_CONTENTS_PER_MINUTE`, `DOCUMENT_PROCESSING_TIMEOUT_MS`.
+
+### Storage
+
+Two drivers are supported and selected automatically:
+
+- **`fs`** (default) — document metadata in `data/documents/documents.json`, conversations in `data/conversations/conversations.json`, PDFs under `data/documents/files`. Used for local development, tests, and hosts with a writable persistent disk (Railway/Render with a volume).
+- **`vercel`** — document/conversation state in Postgres (`app_state` JSONB table, created automatically) and PDFs in a private Vercel Blob store. Mutations run in a Postgres transaction with `SELECT ... FOR UPDATE`, so concurrent serverless invocations do not lose updates.
+
+`STORAGE_DRIVER=vercel` is chosen automatically when both `DATABASE_URL` (or `POSTGRES_URL`) and `BLOB_READ_WRITE_TOKEN` are present. Force either driver with `STORAGE_DRIVER`.
+
+To move existing local data (JSON stores + PDFs) into Postgres/Blob, run once with both variables exported:
+
+```bash
+npm run migrate:storage
+```
+
 ## Getting Started (Original)
 
 Run the development server:

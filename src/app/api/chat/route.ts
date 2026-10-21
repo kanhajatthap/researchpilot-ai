@@ -6,7 +6,7 @@ import { agentManager } from '@/lib/agents';
 import { getConversation, updateConversation, getConversationIdFromRequest } from '@/lib/rag/conversation-store.server';
 import { generateTitleFromMessage } from '@/lib/rag/title-generator';
 import { validateMessages, buildContextPrompt, type IncomingMessage } from '@/lib/rag/chat-utils';
-import type { Message, Citation } from '@/types/chat';
+import type { Message, Citation, Conversation } from '@/types/chat';
 
 export const runtime = 'nodejs';
 
@@ -66,15 +66,33 @@ export async function POST(req: NextRequest) {
   const documentId = body?.documentId || null;
   const encoder = new TextEncoder();
 
-  // Get or create conversation
-  const conversationId = await getConversationIdFromRequest(body as Record<string, unknown>);
+  // Get or create conversation. The store writes to the local filesystem, so
+  // this throws on read-only filesystems (e.g. Vercel serverless). Wrap it so
+  // the client gets a clear 5xx JSON error instead of an unhandled rejection.
+  let conversationId: string | null = null;
+  let existingConversation: Conversation | null = null;
+  try {
+    conversationId = await getConversationIdFromRequest(body as Record<string, unknown>);
+    if (conversationId) {
+      existingConversation = await getConversation(conversationId);
+    }
+  } catch (error) {
+    console.error('[api/chat] conversation store error:', errorMessage(error, 'Unknown error'));
+    return NextResponse.json(
+      {
+        error:
+          'The conversation store is unavailable on this server. ' +
+          'If this is a serverless/read-only filesystem, configure a persistent store (e.g. Vercel KV/Postgres) or deploy to a host with writable disk.',
+      },
+      { status: 503 }
+    );
+  }
   if (!conversationId) {
     return NextResponse.json(
       { error: 'Failed to create or retrieve conversation' },
       { status: 500 }
     );
   }
-  const existingConversation = await getConversation(conversationId);
 
   // Create an agent for this chat session
   const chatAgent = agentManager.createAgent(

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { documentStore } from '@/lib/rag/document-store';
-import { vectorStore } from '@/lib/rag/vectorstore';
+import { purgeDocumentVectors, vectorPurgeFailureMessages } from '@/lib/rag/vectorstore';
 import {
   processDocument,
   DocumentValidationError,
@@ -60,17 +60,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ doc
   }
 
   // Confirm the original PDF exists and is readable BEFORE claiming an attempt,
-  // so a missing file cannot strand the record in a non-terminal state.
-  const filePath = await documentStore.getFilePath(documentId);
-  if (!filePath) {
-    return NextResponse.json({
-      error: 'No stored PDF file is available for this document. Please upload the file again.',
-    }, { status: 409 });
-  }
+  // so a missing file cannot strand the record in a non-terminal state. This
+  // works for both the filesystem and Vercel Blob drivers.
   let pdfBuffer: Buffer;
   try {
-    const fs = await import('node:fs/promises');
-    pdfBuffer = await fs.readFile(filePath);
+    const stored = await documentStore.readFile(documentId);
+    if (!stored) {
+      return NextResponse.json({
+        error: 'No stored PDF file is available for this document. Please upload the file again.',
+      }, { status: 409 });
+    }
+    pdfBuffer = stored;
   } catch (error) {
     console.error(`[retry] stored PDF unreadable document=${documentId}:`, error);
     return NextResponse.json({
@@ -93,30 +93,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ doc
 
   try {
     // Clean up any vectors from previous attempts and verify removal.
-    try {
-      await vectorStore.deleteDocument(documentId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await documentStore.markFailedIfAttempt(
-        documentId,
-        `Vector cleanup failed before reprocessing: ${message}`,
-        attemptId,
-      );
-      return NextResponse.json({
-        error: 'Vector cleanup failed — cannot start reprocessing safely.',
-      }, { status: 500 });
-    }
-
-    const remainingIds = await vectorStore.listDocumentIds();
-    if (remainingIds.includes(documentId)) {
-      await documentStore.markFailedIfAttempt(
-        documentId,
-        'Vector cleanup verification failed — document still has stored vectors.',
-        attemptId,
-      );
-      return NextResponse.json({
-        error: 'Vector cleanup verification failed — cannot start reprocessing safely.',
-      }, { status: 500 });
+    // Shared with the re-upload (adopt) path — same invariant, same messages.
+    const purge = await purgeDocumentVectors(documentId);
+    if (!purge.ok) {
+      const messages = vectorPurgeFailureMessages(purge);
+      await documentStore.markFailedIfAttempt(documentId, messages.record, attemptId);
+      return NextResponse.json({ error: messages.response }, { status: 500 });
     }
 
     // Run the shared processing pipeline (attempt-gated writes).
