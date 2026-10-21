@@ -201,7 +201,7 @@ async function retryTransient<T>(fn: () => Promise<T>, maxRetries = 2, delayMs =
           }
           if (!candidateText) {
             candidateText = parts
-              .filter((p) => typeof p.text === 'string' && !p.thought)
+              .filter((p) => typeof p.text === 'string' && !(p as { thought?: boolean }).thought)
               .map((p) => p.text as string)
               .join('');
           }
@@ -360,7 +360,7 @@ async function retryTransient<T>(fn: () => Promise<T>, maxRetries = 2, delayMs =
           contents,
           config: {
             systemInstruction: AGENT_SYSTEM_INSTRUCTION,
-            tools: GEMINI_AGENT_TOOLS,
+            tools: GEMINI_AGENT_TOOLS as any,
             abortSignal: signal,
           },
         })

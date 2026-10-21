@@ -83,6 +83,17 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
     return () => clearTimeout(timer);
   }, [fetchDocuments]);
 
+  // Support ?doc= query parameter to auto-scope document when navigated from /documents
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const docParam = params.get('doc');
+      if (docParam) {
+        setSelectedDocumentId(docParam);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
@@ -425,6 +436,17 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
     },
     [setSelectedConversationId]
   );
+
+  // Deep-link: support ?cid= to resume conversation from /history
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const cid = params.get('cid');
+      if (cid) {
+        handleSelectConversation(cid);
+      }
+    }
+  }, [handleSelectConversation]);
 
   const handleDeleteConversation = useCallback(
     async (id: string) => {

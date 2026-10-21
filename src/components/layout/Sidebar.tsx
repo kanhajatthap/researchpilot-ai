@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Brand } from './Brand';
@@ -15,58 +15,48 @@ export interface SidebarProps {
 interface NavItem {
   label: string;
   icon: typeof LayoutDashboard;
-  href?: string;
-  active?: boolean;
+  href: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Research', icon: LayoutDashboard, href: '/', active: true },
-  { label: 'Documents', icon: FileText },
-  { label: 'Sources', icon: Library },
-  { label: 'History', icon: History },
+  { label: 'Research', icon: LayoutDashboard, href: '/' },
+  { label: 'Documents', icon: FileText, href: '/documents' },
+  { label: 'Sources', icon: Library, href: '/sources' },
+  { label: 'History', icon: History, href: '/history' },
 ];
 
-function NavLink({ item }: { item: NavItem }) {
+function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const Icon = item.icon;
 
   const content = (
     <>
       <Icon className='size-4 shrink-0' />
       <span className='truncate'>{item.label}</span>
-      {item.active && (
+      {isActive && (
         <span className='ml-auto size-1.5 rounded-full bg-foreground/70' aria-hidden />
       )}
     </>
   );
 
-  const classes = cn(
-    'flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors',
-    item.active
-      ? 'bg-primary/10 text-foreground'
-      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-  );
-
-  if (item.href) {
-    return (
-      <Link href={item.href} className={classes} aria-current={item.active ? 'page' : undefined}>
-        {content}
-      </Link>
-    );
-  }
-
   return (
-    <button
-      type='button'
-      className={cn(classes, 'cursor-default')}
-      aria-disabled='true'
-      title='Coming soon'
+    <Link
+      href={item.href}
+      className={cn(
+        'flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors',
+        isActive
+          ? 'bg-primary/10 text-foreground'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+      )}
+      aria-current={isActive ? 'page' : undefined}
     >
       {content}
-    </button>
+    </Link>
   );
 }
 
 export function Sidebar({ className }: SidebarProps) {
+  const pathname = usePathname();
+
   return (
     <aside className={cn('flex h-full w-full flex-col border-r border-border/70 bg-sidebar', className)}>
       <div className='flex h-14 items-center border-b border-border/70 px-4 md:hidden'>
@@ -79,7 +69,11 @@ export function Sidebar({ className }: SidebarProps) {
             Workspace
           </p>
           {NAV_ITEMS.map((item) => (
-            <NavLink key={item.label} item={item} />
+            <NavLink
+              key={item.label}
+              item={item}
+              isActive={pathname === item.href}
+            />
           ))}
         </nav>
 
@@ -97,15 +91,19 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
 
       <div className='border-t border-border/70 p-3'>
-        <Button
-          variant='ghost'
-          size='sm'
-          className='w-full justify-start gap-2.5 text-muted-foreground'
-          title='Coming soon'
+        <Link
+          href='/settings'
+          className={cn(
+            'flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors',
+            pathname === '/settings'
+              ? 'bg-primary/10 text-foreground'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          )}
+          aria-current={pathname === '/settings' ? 'page' : undefined}
         >
           <Settings className='size-4' />
           Settings
-        </Button>
+        </Link>
       </div>
     </aside>
   );
