@@ -260,7 +260,7 @@ export default function ArchitecturePage() {
   };
 
   return (
-    <div className='relative min-h-screen bg-background pb-16 selection:bg-primary/20'>
+    <div className='relative min-h-screen bg-background pb-20 selection:bg-primary/20 text-foreground'>
       {/* Background Decorative Mesh Pattern */}
       <div className='absolute inset-0 -z-10 rp-dot-grid opacity-30 dark:opacity-20 pointer-events-none' />
       <div className='absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl -z-10 pointer-events-none' />
@@ -268,40 +268,40 @@ export default function ArchitecturePage() {
       <div className='container mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 space-y-8'>
         {/* Top Navigation Breadcrumb & Mode Switcher */}
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/70 pb-4'>
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+          <div className='flex items-center gap-2 text-sm sm:text-base text-muted-foreground'>
             <Link href='/' className='hover:text-foreground transition-colors'>Workspace</Link>
-            <ChevronRight className='size-3.5' />
+            <ChevronRight className='size-4' />
             <Link href='/settings' className='hover:text-foreground transition-colors'>Settings</Link>
-            <ChevronRight className='size-3.5' />
+            <ChevronRight className='size-4' />
             <span className='font-semibold text-foreground'>System Architecture & Blueprint</span>
           </div>
 
           <div className='flex items-center gap-2'>
-            <div className='flex items-center rounded-lg border border-border/70 bg-card p-0.5 shadow-xs'>
+            <div className='flex items-center rounded-xl border border-border/80 bg-card p-1 shadow-xs'>
               <button
                 type='button'
                 onClick={() => setViewMode('technical')}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
+                  'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-semibold transition-all',
                   viewMode === 'technical'
                     ? 'bg-primary text-primary-foreground shadow-xs'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Code2 className='size-3.5' />
+                <Code2 className='size-4' />
                 Lead Architect (Tech)
               </button>
               <button
                 type='button'
                 onClick={() => setViewMode('executive')}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
+                  'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-semibold transition-all',
                   viewMode === 'executive'
                     ? 'bg-primary text-primary-foreground shadow-xs'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Sliders className='size-3.5' />
+                <Sliders className='size-4' />
                 Executive (Client/Investor)
               </button>
             </div>
@@ -309,29 +309,29 @@ export default function ArchitecturePage() {
         </div>
 
         {/* Hero Section */}
-        <div className='relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card/90 via-card/70 to-primary/5 p-6 sm:p-10 backdrop-blur-xl shadow-xl'>
-          <div className='flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-            <div className='space-y-4 max-w-3xl'>
-              <div className='flex flex-wrap items-center gap-2'>
-                <Badge variant='outline' className='gap-1.5 border-primary/40 bg-primary/10 text-primary font-mono text-xs px-2.5 py-1'>
-                  <Cpu className='size-3.5' />
+        <div className='relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card/95 via-card/80 to-primary/5 p-6 sm:p-10 backdrop-blur-xl shadow-xl'>
+          <div className='flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between'>
+            <div className='space-y-5 max-w-3xl'>
+              <div className='flex flex-wrap items-center gap-2.5'>
+                <Badge variant='outline' className='gap-2 border-primary/40 bg-primary/10 text-primary font-mono text-xs sm:text-sm px-3 py-1.5 font-medium'>
+                  <Cpu className='size-4' />
                   Production Blueprint v0.1.0
                 </Badge>
-                <Badge variant='outline' className='gap-1 border-success/40 bg-success/10 text-success text-xs font-mono px-2.5 py-1'>
-                  <CheckCircle2 className='size-3.5' />
+                <Badge variant='outline' className='gap-1.5 border-success/40 bg-success/10 text-success text-xs sm:text-sm font-mono px-3 py-1.5 font-medium'>
+                  <CheckCircle2 className='size-4' />
                   204/204 Tests Passing (22 Suites)
                 </Badge>
-                <Badge variant='outline' className='gap-1 border-warning/40 bg-warning/10 text-warning text-xs font-mono px-2.5 py-1'>
-                  <Zap className='size-3.5' />
+                <Badge variant='outline' className='gap-1.5 border-warning/40 bg-warning/10 text-warning text-xs sm:text-sm font-mono px-3 py-1.5 font-medium'>
+                  <Zap className='size-4' />
                   $0.00 / Mo Infrastructure
                 </Badge>
               </div>
 
-              <h1 className='font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground'>
+              <h1 className='font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-tight'>
                 How ResearchPilot AI is Engineered
               </h1>
 
-              <p className='text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl'>
+              <p className='text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl font-normal'>
                 {viewMode === 'technical'
                   ? 'An architectural breakdown of our autonomous ReAct reasoning engine, CPU-based HuggingFace dense vector embeddings, atomic concurrency write-locks, and sandboxed AST mathematical tool execution.'
                   : 'An enterprise-ready AI research platform that eliminates hallucinations through strict page-level source citations and zero-cost local execution—delivering institutional intelligence without recurring cloud fees.'}
@@ -341,35 +341,35 @@ export default function ArchitecturePage() {
               <div className='flex flex-wrap items-center gap-3 pt-2'>
                 <Button
                   onClick={() => copyToClipboard(PITCH_DECK.elevator, 'elevator')}
-                  size='sm'
-                  className='gap-2 text-xs shadow-md'
+                  size='default'
+                  className='gap-2 text-sm sm:text-base font-semibold px-5 py-2.5 shadow-md'
                 >
                   {copiedKey === 'elevator' ? (
                     <>
-                      <Check className='size-3.5 text-success' />
+                      <Check className='size-4 text-success' />
                       Copied 30-Sec Pitch!
                     </>
                   ) : (
                     <>
-                      <Copy className='size-3.5' />
+                      <Copy className='size-4' />
                       Copy 30-Sec Pitch
                     </>
                   )}
                 </Button>
                 <Button
                   variant='outline'
-                  size='sm'
+                  size='default'
                   onClick={() => copyToClipboard(PITCH_DECK.enterprise, 'enterprise')}
-                  className='gap-2 text-xs border-border/80 hover:bg-muted'
+                  className='gap-2 text-sm sm:text-base font-semibold px-5 py-2.5 border-border/80 hover:bg-muted'
                 >
                   {copiedKey === 'enterprise' ? (
                     <>
-                      <Check className='size-3.5 text-success' />
+                      <Check className='size-4 text-success' />
                       Copied Enterprise Pitch!
                     </>
                   ) : (
                     <>
-                      <Shield className='size-3.5 text-primary' />
+                      <Shield className='size-4 text-primary' />
                       Copy Enterprise Security Pitch
                     </>
                   )}
@@ -378,30 +378,32 @@ export default function ArchitecturePage() {
             </div>
 
             {/* Live Status Metric Card */}
-            <div className='rounded-2xl border border-border/70 bg-background/60 p-5 backdrop-blur-md space-y-3 min-w-[280px] shadow-sm'>
-              <div className='flex items-center justify-between border-b border-border/60 pb-3'>
-                <span className='flex items-center gap-2 text-xs font-semibold text-foreground'>
-                  <span className='size-2 rounded-full bg-success animate-pulse' />
+            <div className='rounded-2xl border border-border/80 bg-background/80 p-6 backdrop-blur-md space-y-4 min-w-[320px] shadow-md'>
+              <div className='flex items-center justify-between border-b border-border/70 pb-3'>
+                <span className='flex items-center gap-2.5 text-sm sm:text-base font-bold text-foreground'>
+                  <span className='size-2.5 rounded-full bg-success animate-pulse' />
                   Engine Health Status
                 </span>
-                <span className='font-mono text-[11px] text-success font-bold'>ACTIVE</span>
+                <span className='font-mono text-xs sm:text-sm text-success font-extrabold bg-success/10 px-2 py-0.5 rounded'>
+                  ACTIVE
+                </span>
               </div>
-              <div className='space-y-2 text-xs'>
+              <div className='space-y-3 text-xs sm:text-sm'>
                 <div className='flex justify-between py-1 border-b border-border/40'>
                   <span className='text-muted-foreground'>Agent Loop:</span>
-                  <span className='font-mono font-medium text-foreground'>ReAct Framework</span>
+                  <span className='font-mono font-semibold text-foreground'>ReAct Framework</span>
                 </div>
                 <div className='flex justify-between py-1 border-b border-border/40'>
                   <span className='text-muted-foreground'>Local Vector Store:</span>
-                  <span className='font-mono font-medium text-foreground'>ChromaDB (Cosine)</span>
+                  <span className='font-mono font-semibold text-foreground'>ChromaDB (Cosine)</span>
                 </div>
                 <div className='flex justify-between py-1 border-b border-border/40'>
                   <span className='text-muted-foreground'>Embeddings Model:</span>
-                  <span className='font-mono font-medium text-foreground'>all-MiniLM-L6-v2</span>
+                  <span className='font-mono font-semibold text-foreground'>all-MiniLM-L6-v2</span>
                 </div>
                 <div className='flex justify-between py-1 border-b border-border/40'>
                   <span className='text-muted-foreground'>Math Sandbox:</span>
-                  <span className='font-mono font-medium text-success'>Deterministic AST</span>
+                  <span className='font-mono font-semibold text-success'>Deterministic AST</span>
                 </div>
                 <div className='flex justify-between py-1'>
                   <span className='text-muted-foreground'>Verified Test Suites:</span>
@@ -428,13 +430,13 @@ export default function ArchitecturePage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
-                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition-all whitespace-nowrap',
+                  'flex items-center gap-2.5 rounded-xl px-5 py-3 text-sm sm:text-base font-semibold transition-all whitespace-nowrap',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
-                <Icon className='size-3.5' />
+                <Icon className='size-4' />
                 {tab.label}
               </button>
             );
@@ -446,17 +448,17 @@ export default function ArchitecturePage() {
           <div className='space-y-6'>
             <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
               {/* Left Column: Visual Tier Node Selector */}
-              <div className='lg:col-span-5 space-y-3'>
+              <div className='lg:col-span-5 space-y-3.5'>
                 <div className='flex items-center justify-between pb-1'>
-                  <h2 className='text-sm font-bold text-foreground flex items-center gap-2'>
-                    <Layers className='size-4 text-primary' />
+                  <h2 className='text-base sm:text-lg font-bold text-foreground flex items-center gap-2'>
+                    <Layers className='size-5 text-primary' />
                     System Architectural Tiers
                   </h2>
-                  <span className='text-[11px] text-muted-foreground'>Click any node to inspect</span>
+                  <span className='text-xs sm:text-sm text-muted-foreground'>Click any node to inspect</span>
                 </div>
 
-                <div className='space-y-2.5'>
-                  {ARCH_NODES.map((node, idx) => {
+                <div className='space-y-3'>
+                  {ARCH_NODES.map((node) => {
                     const Icon = node.icon;
                     const isSelected = selectedNode.id === node.id;
                     return (
@@ -464,39 +466,39 @@ export default function ArchitecturePage() {
                         key={node.id}
                         onClick={() => setSelectedNode(node)}
                         className={cn(
-                          'group relative flex items-center justify-between rounded-2xl border p-4 cursor-pointer transition-all duration-200',
+                          'group relative flex items-center justify-between rounded-2xl border p-4 sm:p-5 cursor-pointer transition-all duration-200',
                           isSelected
-                            ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/30'
-                            : 'border-border/70 bg-card hover:border-foreground/20 hover:bg-muted/40'
+                            ? 'border-primary bg-primary/10 shadow-md ring-2 ring-primary/30'
+                            : 'border-border/80 bg-card hover:border-foreground/30 hover:bg-muted/50'
                         )}
                       >
-                        <div className='flex items-center gap-3.5'>
+                        <div className='flex items-center gap-4'>
                           <span
                             className={cn(
-                              'flex size-10 items-center justify-center rounded-xl transition-colors',
+                              'flex size-12 items-center justify-center rounded-xl transition-colors',
                               isSelected
-                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                ? 'bg-primary text-primary-foreground shadow-sm'
                                 : 'bg-muted text-muted-foreground group-hover:text-foreground'
                             )}
                           >
-                            <Icon className='size-5' />
+                            <Icon className='size-6' />
                           </span>
                           <div>
                             <div className='flex items-center gap-2'>
-                              <p className='text-xs font-bold text-foreground'>{node.name}</p>
+                              <p className='text-sm sm:text-base font-bold text-foreground'>{node.name}</p>
                               {isSelected && (
-                                <span className='size-2 rounded-full bg-primary animate-pulse' />
+                                <span className='size-2.5 rounded-full bg-primary animate-pulse' />
                               )}
                             </div>
-                            <p className='text-[11px] text-muted-foreground mt-0.5'>{node.tier}</p>
+                            <p className='text-xs sm:text-sm text-muted-foreground mt-0.5'>{node.tier}</p>
                           </div>
                         </div>
 
-                        <div className='flex flex-col items-end gap-1'>
-                          <Badge variant='outline' className='text-[10px] font-mono'>
+                        <div className='flex flex-col items-end gap-1.5'>
+                          <Badge variant='outline' className='text-xs font-mono font-medium px-2.5 py-0.5'>
                             {node.badge}
                           </Badge>
-                          <span className='text-[10px] text-muted-foreground font-mono'>
+                          <span className='text-xs text-muted-foreground font-mono'>
                             {node.latency}
                           </span>
                         </div>
@@ -508,41 +510,41 @@ export default function ArchitecturePage() {
 
               {/* Right Column: Deep-Dive Node Inspector */}
               <div className='lg:col-span-7'>
-                <Card className='border-border/80 bg-card/90 backdrop-blur-xl p-6 rounded-2xl space-y-5 shadow-lg h-full'>
-                  <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/70 pb-4'>
-                    <div className='flex items-center gap-3'>
-                      <span className='flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary'>
-                        <selectedNode.icon className='size-5' />
+                <Card className='border-border/80 bg-card/95 backdrop-blur-xl p-6 sm:p-8 rounded-2xl space-y-6 shadow-xl h-full'>
+                  <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/70 pb-5'>
+                    <div className='flex items-center gap-3.5'>
+                      <span className='flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+                        <selectedNode.icon className='size-6' />
                       </span>
                       <div>
-                        <div className='flex items-center gap-2'>
-                          <h3 className='font-heading text-base font-bold text-foreground'>
+                        <div className='flex items-center gap-2.5'>
+                          <h3 className='font-heading text-lg sm:text-xl font-bold text-foreground'>
                             {selectedNode.name}
                           </h3>
-                          <Badge variant='secondary' className='text-[10px] font-mono'>
+                          <Badge variant='secondary' className='text-xs font-mono font-medium px-2.5 py-0.5'>
                             {selectedNode.tier}
                           </Badge>
                         </div>
-                        <p className='text-xs text-muted-foreground mt-0.5'>
-                          Benchmark Latency: <strong className='text-success font-mono'>{selectedNode.latency}</strong>
+                        <p className='text-sm text-muted-foreground mt-1'>
+                          Benchmark Latency: <strong className='text-success font-mono font-semibold'>{selectedNode.latency}</strong>
                         </p>
                       </div>
                     </div>
 
                     <Button
                       variant='outline'
-                      size='xs'
+                      size='sm'
                       onClick={() => copyToClipboard(selectedNode.codeSnippet, `code_${selectedNode.id}`)}
-                      className='gap-1.5 text-xs self-start sm:self-center'
+                      className='gap-2 text-xs sm:text-sm self-start sm:self-center font-medium'
                     >
                       {copiedKey === `code_${selectedNode.id}` ? (
                         <>
-                          <Check className='size-3 text-success' />
+                          <Check className='size-3.5 text-success' />
                           Copied!
                         </>
                       ) : (
                         <>
-                          <Copy className='size-3' />
+                          <Copy className='size-3.5' />
                           Copy Snippet
                         </>
                       )}
@@ -550,34 +552,34 @@ export default function ArchitecturePage() {
                   </div>
 
                   {/* Role & Responsibility */}
-                  <div className='space-y-1.5'>
-                    <p className='text-[11px] font-bold uppercase tracking-wider text-muted-foreground'>
+                  <div className='space-y-2'>
+                    <p className='text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground'>
                       Primary Responsibility
                     </p>
-                    <p className='text-xs text-foreground leading-relaxed'>
+                    <p className='text-sm sm:text-base text-foreground leading-relaxed font-normal'>
                       {selectedNode.role}
                     </p>
                   </div>
 
                   {/* Key Architectural Highlight */}
-                  <div className='rounded-xl border border-primary/20 bg-primary/5 p-3.5 space-y-1'>
-                    <div className='flex items-center gap-1.5 text-xs font-semibold text-primary'>
-                      <Sparkles className='size-3.5' />
+                  <div className='rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-1.5'>
+                    <div className='flex items-center gap-2 text-sm sm:text-base font-bold text-primary'>
+                      <Sparkles className='size-4' />
                       <span>Why This Is Critical</span>
                     </div>
-                    <p className='text-xs text-muted-foreground leading-relaxed'>
+                    <p className='text-sm sm:text-base text-muted-foreground leading-relaxed'>
                       {selectedNode.highlight}
                     </p>
                   </div>
 
                   {/* Technology Badges */}
-                  <div className='space-y-1.5'>
-                    <p className='text-[11px] font-bold uppercase tracking-wider text-muted-foreground'>
+                  <div className='space-y-2'>
+                    <p className='text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground'>
                       Engineered With
                     </p>
-                    <div className='flex flex-wrap gap-1.5'>
+                    <div className='flex flex-wrap gap-2'>
                       {selectedNode.techStack.map((tech) => (
-                        <Badge key={tech} variant='outline' className='text-[11px] font-mono bg-muted/30'>
+                        <Badge key={tech} variant='outline' className='text-xs sm:text-sm font-mono font-medium bg-muted/40 px-3 py-1'>
                           {tech}
                         </Badge>
                       ))}
@@ -585,21 +587,21 @@ export default function ArchitecturePage() {
                   </div>
 
                   {/* Core Code Implementation Preview */}
-                  <div className='space-y-1.5 pt-1'>
-                    <div className='flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground'>
+                  <div className='space-y-2 pt-1'>
+                    <div className='flex items-center justify-between text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground'>
                       <span>Production Implementation Snippet</span>
-                      <span className='font-mono text-[10px] text-muted-foreground'>{selectedNode.files[0]}</span>
+                      <span className='font-mono text-xs text-muted-foreground'>{selectedNode.files[0]}</span>
                     </div>
-                    <div className='relative rounded-xl border border-border/80 bg-muted/40 p-3.5 font-mono text-[11px] text-foreground overflow-x-auto leading-relaxed max-h-56'>
+                    <div className='relative rounded-xl border border-border/80 bg-muted/50 p-4 font-mono text-xs sm:text-sm text-foreground overflow-x-auto leading-relaxed max-h-64'>
                       <pre><code>{selectedNode.codeSnippet}</code></pre>
                     </div>
                   </div>
 
                   {/* Relevant Source Files */}
-                  <div className='pt-2 border-t border-border/60 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground'>
-                    <span className='font-semibold text-foreground'>Source Files:</span>
+                  <div className='pt-3 border-t border-border/60 flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <span className='font-bold text-foreground'>Source Files:</span>
                     {selectedNode.files.map((file) => (
-                      <code key={file} className='rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground'>
+                      <code key={file} className='rounded bg-muted px-2 py-1 font-mono text-xs font-medium text-foreground'>
                         {file}
                       </code>
                     ))}
@@ -616,66 +618,66 @@ export default function ArchitecturePage() {
             <Card className='border-border/80 bg-card p-6 sm:p-8 rounded-2xl space-y-6 shadow-md'>
               <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5'>
                 <div>
-                  <h2 className='text-base font-bold text-foreground flex items-center gap-2'>
-                    <Workflow className='size-4 text-primary' />
+                  <h2 className='text-lg sm:text-xl font-bold text-foreground flex items-center gap-2'>
+                    <Workflow className='size-5 text-primary' />
                     Live ReAct Query Execution Simulation
                   </h2>
-                  <p className='text-xs text-muted-foreground mt-0.5'>
+                  <p className='text-sm sm:text-base text-muted-foreground mt-1'>
                     Step through the exact 5-stage pipeline executed when researching a complex financial report.
                   </p>
                 </div>
 
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2.5'>
                   <Button
-                    size='xs'
+                    size='sm'
                     variant='outline'
                     onClick={() => setCurrentSimStep((prev) => Math.max(0, prev - 1))}
                     disabled={currentSimStep === 0}
-                    className='text-xs'
+                    className='text-xs sm:text-sm font-semibold'
                   >
                     Previous Step
                   </Button>
                   <Button
-                    size='xs'
+                    size='sm'
                     onClick={() => setCurrentSimStep((prev) => Math.min(SIMULATION_STEPS.length - 1, prev + 1))}
                     disabled={currentSimStep === SIMULATION_STEPS.length - 1}
-                    className='gap-1.5 text-xs'
+                    className='gap-2 text-xs sm:text-sm font-semibold'
                   >
                     Next Step
-                    <ArrowRight className='size-3' />
+                    <ArrowRight className='size-3.5' />
                   </Button>
                   <Button
-                    size='xs'
+                    size='sm'
                     variant='ghost'
                     onClick={() => setCurrentSimStep(0)}
-                    className='text-xs'
+                    className='text-xs sm:text-sm'
                     title='Reset Simulation'
                   >
-                    <RotateCcw className='size-3.5' />
+                    <RotateCcw className='size-4' />
                   </Button>
                 </div>
               </div>
 
               {/* Progress Stepper Indicator */}
-              <div className='grid grid-cols-2 sm:grid-cols-5 gap-2'>
+              <div className='grid grid-cols-2 sm:grid-cols-5 gap-3'>
                 {SIMULATION_STEPS.map((step, idx) => (
                   <button
                     key={step.step}
                     onClick={() => setCurrentSimStep(idx)}
                     className={cn(
-                      'flex flex-col items-start p-2.5 rounded-xl border text-left transition-all',
+                      'flex flex-col items-start p-3.5 rounded-xl border text-left transition-all',
                       currentSimStep === idx
-                        ? 'border-primary bg-primary/10 shadow-xs'
+                        ? 'border-primary bg-primary/10 shadow-sm ring-1 ring-primary/30'
                         : currentSimStep > idx
                         ? 'border-success/40 bg-success/5 text-muted-foreground'
                         : 'border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40'
                     )}
                   >
                     <div className='flex items-center justify-between w-full'>
-                      <span className='font-mono text-[10px] font-bold'>STAGE 0{step.step}</span>
-                      <span className='font-mono text-[9px]'>{step.time}</span>
+                      <span className='font-mono text-xs font-bold'>STAGE 0{step.step}</span>
+                      <span className='font-mono text-xs text-muted-foreground'>{step.time}</span>
                     </div>
-                    <p className='text-xs font-semibold text-foreground mt-1 truncate w-full'>
+                    <p className='text-xs sm:text-sm font-bold text-foreground mt-1.5 truncate w-full'>
                       {step.title}
                     </p>
                   </button>
@@ -686,38 +688,38 @@ export default function ArchitecturePage() {
               {(() => {
                 const step = SIMULATION_STEPS[currentSimStep];
                 return (
-                  <div className='rounded-2xl border border-border/80 bg-muted/30 p-6 space-y-4'>
-                    <div className='flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3'>
-                      <div className='flex items-center gap-2.5'>
-                        <span className='flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs'>
+                  <div className='rounded-2xl border border-border/80 bg-muted/30 p-6 sm:p-8 space-y-5'>
+                    <div className='flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4'>
+                      <div className='flex items-center gap-3.5'>
+                        <span className='flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm'>
                           {step.step}
                         </span>
                         <div>
-                          <h3 className='text-sm font-bold text-foreground'>{step.title}</h3>
-                          <p className='text-[11px] text-muted-foreground'>Actor: <strong className='text-foreground'>{step.actor}</strong></p>
+                          <h3 className='text-base sm:text-lg font-bold text-foreground'>{step.title}</h3>
+                          <p className='text-xs sm:text-sm text-muted-foreground'>Actor: <strong className='text-foreground'>{step.actor}</strong></p>
                         </div>
                       </div>
 
                       <div className='flex items-center gap-2'>
-                        <Badge variant='outline' className='text-[10px] font-mono'>
+                        <Badge variant='outline' className='text-xs font-mono font-medium px-2.5 py-1'>
                           {step.badge}
                         </Badge>
-                        <Badge variant='secondary' className='text-[10px] font-mono'>
+                        <Badge variant='secondary' className='text-xs font-mono font-medium px-2.5 py-1'>
                           Latency: {step.time}
                         </Badge>
                       </div>
                     </div>
 
-                    <div className='rounded-xl border border-border/70 bg-card p-4 space-y-2'>
-                      <p className='text-xs font-semibold text-foreground'>Payload & Observation Content:</p>
-                      <p className='text-xs font-mono text-muted-foreground leading-relaxed bg-muted/40 p-3 rounded-lg'>
+                    <div className='rounded-xl border border-border/70 bg-card p-5 space-y-2.5'>
+                      <p className='text-xs sm:text-sm font-bold text-foreground'>Payload & Observation Content:</p>
+                      <p className='text-xs sm:text-sm font-mono text-foreground leading-relaxed bg-muted/50 p-4 rounded-xl border border-border/50'>
                         {step.content}
                       </p>
                     </div>
 
-                    <div className='flex items-center justify-between text-[11px] text-muted-foreground pt-1'>
-                      <span>Metadata / Trace Context: <strong className='text-foreground font-mono'>{step.meta}</strong></span>
-                      <span className='text-[10px]'>Step {currentSimStep + 1} of {SIMULATION_STEPS.length}</span>
+                    <div className='flex items-center justify-between text-xs sm:text-sm text-muted-foreground pt-1'>
+                      <span>Metadata / Trace Context: <strong className='text-foreground font-mono font-semibold'>{step.meta}</strong></span>
+                      <span className='text-xs'>Step {currentSimStep + 1} of {SIMULATION_STEPS.length}</span>
                     </div>
                   </div>
                 );
@@ -729,106 +731,106 @@ export default function ArchitecturePage() {
         {/* TAB 3: PRESENTATION & INTERVIEW CHEATSHEET */}
         {activeTab === 'pitch' && (
           <div className='space-y-6'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {/* Card 1: 30-Sec Elevator Pitch */}
-              <Card className='border-border/80 bg-card p-6 space-y-4 rounded-2xl shadow-sm'>
+              <Card className='border-border/80 bg-card p-6 sm:p-8 space-y-4 rounded-2xl shadow-sm'>
                 <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-2'>
-                    <span className='flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary'>
-                      <Sparkles className='size-4' />
+                  <div className='flex items-center gap-2.5'>
+                    <span className='flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+                      <Sparkles className='size-5' />
                     </span>
-                    <h3 className='text-sm font-bold text-foreground'>The 30-Second Elevator Pitch</h3>
+                    <h3 className='text-base sm:text-lg font-bold text-foreground'>The 30-Second Elevator Pitch</h3>
                   </div>
                   <Button
-                    size='xs'
+                    size='sm'
                     variant='outline'
                     onClick={() => copyToClipboard(PITCH_DECK.elevator, 'pitch_elevator')}
-                    className='gap-1 text-xs'
+                    className='gap-1.5 text-xs sm:text-sm font-medium'
                   >
-                    {copiedKey === 'pitch_elevator' ? <Check className='size-3 text-success' /> : <Copy className='size-3' />}
+                    {copiedKey === 'pitch_elevator' ? <Check className='size-3.5 text-success' /> : <Copy className='size-3.5' />}
                     Copy
                   </Button>
                 </div>
-                <p className='text-xs text-muted-foreground leading-relaxed italic bg-muted/30 p-3.5 rounded-xl border border-border/50'>
+                <p className='text-sm sm:text-base text-muted-foreground leading-relaxed italic bg-muted/40 p-4 rounded-xl border border-border/60'>
                   &quot;{PITCH_DECK.elevator}&quot;
                 </p>
-                <p className='text-[11px] text-muted-foreground'>
+                <p className='text-xs sm:text-sm text-muted-foreground'>
                   <strong className='text-foreground'>When to use:</strong> Introductions, networking, portfolio showcases, or opening remarks.
                 </p>
               </Card>
 
               {/* Card 2: Enterprise Security Pitch */}
-              <Card className='border-border/80 bg-card p-6 space-y-4 rounded-2xl shadow-sm'>
+              <Card className='border-border/80 bg-card p-6 sm:p-8 space-y-4 rounded-2xl shadow-sm'>
                 <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-2'>
-                    <span className='flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary'>
-                      <ShieldCheck className='size-4' />
+                  <div className='flex items-center gap-2.5'>
+                    <span className='flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+                      <ShieldCheck className='size-5' />
                     </span>
-                    <h3 className='text-sm font-bold text-foreground'>Enterprise Privacy & ROI Pitch</h3>
+                    <h3 className='text-base sm:text-lg font-bold text-foreground'>Enterprise Privacy & ROI Pitch</h3>
                   </div>
                   <Button
-                    size='xs'
+                    size='sm'
                     variant='outline'
                     onClick={() => copyToClipboard(PITCH_DECK.enterprise, 'pitch_enterprise')}
-                    className='gap-1 text-xs'
+                    className='gap-1.5 text-xs sm:text-sm font-medium'
                   >
-                    {copiedKey === 'pitch_enterprise' ? <Check className='size-3 text-success' /> : <Copy className='size-3' />}
+                    {copiedKey === 'pitch_enterprise' ? <Check className='size-3.5 text-success' /> : <Copy className='size-3.5' />}
                     Copy
                   </Button>
                 </div>
-                <p className='text-xs text-muted-foreground leading-relaxed italic bg-muted/30 p-3.5 rounded-xl border border-border/50'>
+                <p className='text-sm sm:text-base text-muted-foreground leading-relaxed italic bg-muted/40 p-4 rounded-xl border border-border/60'>
                   &quot;{PITCH_DECK.enterprise}&quot;
                 </p>
-                <p className='text-[11px] text-muted-foreground'>
+                <p className='text-xs sm:text-sm text-muted-foreground'>
                   <strong className='text-foreground'>When to use:</strong> Pitching to CFOs, compliance officers, enterprise risk committees, or privacy teams.
                 </p>
               </Card>
 
               {/* Card 3: Deep Technical Interview Pitch */}
-              <Card className='border-border/80 bg-card p-6 space-y-4 rounded-2xl shadow-sm'>
+              <Card className='border-border/80 bg-card p-6 sm:p-8 space-y-4 rounded-2xl shadow-sm'>
                 <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-2'>
-                    <span className='flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary'>
-                      <Terminal className='size-4' />
+                  <div className='flex items-center gap-2.5'>
+                    <span className='flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+                      <Terminal className='size-5' />
                     </span>
-                    <h3 className='text-sm font-bold text-foreground'>Lead Engineer & System Architect Pitch</h3>
+                    <h3 className='text-base sm:text-lg font-bold text-foreground'>Lead Engineer & System Architect Pitch</h3>
                   </div>
                   <Button
-                    size='xs'
+                    size='sm'
                     variant='outline'
                     onClick={() => copyToClipboard(PITCH_DECK.technical, 'pitch_technical')}
-                    className='gap-1 text-xs'
+                    className='gap-1.5 text-xs sm:text-sm font-medium'
                   >
-                    {copiedKey === 'pitch_technical' ? <Check className='size-3 text-success' /> : <Copy className='size-3' />}
+                    {copiedKey === 'pitch_technical' ? <Check className='size-3.5 text-success' /> : <Copy className='size-3.5' />}
                     Copy
                   </Button>
                 </div>
-                <p className='text-xs text-muted-foreground leading-relaxed italic bg-muted/30 p-3.5 rounded-xl border border-border/50'>
+                <p className='text-sm sm:text-base text-muted-foreground leading-relaxed italic bg-muted/40 p-4 rounded-xl border border-border/60'>
                   &quot;{PITCH_DECK.technical}&quot;
                 </p>
-                <p className='text-[11px] text-muted-foreground'>
+                <p className='text-xs sm:text-sm text-muted-foreground'>
                   <strong className='text-foreground'>When to use:</strong> Technical interviews with VP of Engineering, Staff Engineers, or CTOs.
                 </p>
               </Card>
 
               {/* Card 4: Key Interview QA Flashcards */}
-              <Card className='border-border/80 bg-card p-6 space-y-3 rounded-2xl shadow-sm'>
-                <h3 className='text-sm font-bold text-foreground flex items-center gap-2'>
-                  <HelpCircle className='size-4 text-primary' />
+              <Card className='border-border/80 bg-card p-6 sm:p-8 space-y-4 rounded-2xl shadow-sm'>
+                <h3 className='text-base sm:text-lg font-bold text-foreground flex items-center gap-2.5'>
+                  <HelpCircle className='size-5 text-primary' />
                   Top 3 Tough Questions Handled
                 </h3>
-                <div className='space-y-2 text-xs'>
-                  <div className='rounded-lg bg-muted/40 p-2.5 space-y-1'>
-                    <p className='font-semibold text-foreground'>Q: How do you prevent race conditions during concurrent document uploads?</p>
-                    <p className='text-muted-foreground text-[11px]'>A: By writing to a random UUID temp file and performing an atomic OS-level <code className='text-foreground'>fs.rename()</code> swap, guaranteeing zero corrupted reads.</p>
+                <div className='space-y-3 text-xs sm:text-sm'>
+                  <div className='rounded-xl bg-muted/40 p-3.5 space-y-1.5'>
+                    <p className='font-bold text-foreground'>Q: How do you prevent race conditions during concurrent document uploads?</p>
+                    <p className='text-muted-foreground text-xs sm:text-sm leading-relaxed'>A: By writing to a random UUID temp file and performing an atomic OS-level <code className='text-foreground font-semibold'>fs.rename()</code> swap, guaranteeing zero corrupted reads.</p>
                   </div>
-                  <div className='rounded-lg bg-muted/40 p-2.5 space-y-1'>
-                    <p className='font-semibold text-foreground'>Q: Why not use OpenAI embeddings API?</p>
-                    <p className='text-muted-foreground text-[11px]'>A: Local Xenova all-MiniLM runs offline in CPU memory, costs $0, avoids cloud rate limits, and prevents confidential financial disclosures from leaving the server.</p>
+                  <div className='rounded-xl bg-muted/40 p-3.5 space-y-1.5'>
+                    <p className='font-bold text-foreground'>Q: Why not use OpenAI embeddings API?</p>
+                    <p className='text-muted-foreground text-xs sm:text-sm leading-relaxed'>A: Local Xenova all-MiniLM runs offline in CPU memory, costs $0, avoids cloud rate limits, and prevents confidential financial disclosures from leaving the server.</p>
                   </div>
-                  <div className='rounded-lg bg-muted/40 p-2.5 space-y-1'>
-                    <p className='font-semibold text-foreground'>Q: How do you guarantee the math isn&apos;t hallucinated?</p>
-                    <p className='text-muted-foreground text-[11px]'>A: The agent delegates calculation to our AST parser. The LLM only identifies the formula; our recursive-descent math engine executes the arithmetic.</p>
+                  <div className='rounded-xl bg-muted/40 p-3.5 space-y-1.5'>
+                    <p className='font-bold text-foreground'>Q: How do you guarantee the math isn&apos;t hallucinated?</p>
+                    <p className='text-muted-foreground text-xs sm:text-sm leading-relaxed'>A: The agent delegates calculation to our AST parser. The LLM only identifies the formula; our recursive-descent math engine executes the arithmetic.</p>
                   </div>
                 </div>
               </Card>
@@ -841,97 +843,97 @@ export default function ArchitecturePage() {
           <div className='space-y-6'>
             <Card className='border-border/80 bg-card p-6 sm:p-8 rounded-2xl space-y-6 shadow-md'>
               <div>
-                <h2 className='text-base font-bold text-foreground flex items-center gap-2'>
-                  <Code2 className='size-4 text-primary' />
+                <h2 className='text-lg sm:text-xl font-bold text-foreground flex items-center gap-2'>
+                  <Code2 className='size-5 text-primary' />
                   Complete Micro-File & Architecture Manifest
                 </h2>
-                <p className='text-xs text-muted-foreground mt-0.5'>
+                <p className='text-sm sm:text-base text-muted-foreground mt-1'>
                   Every critical file in the repository mapped directly to its architectural domain.
                 </p>
               </div>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-xs'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 font-mono'>
                 {/* Module 1: ReAct Agent */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <Cpu className='size-4' />
                     <span>Agent & Tooling</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/lib/agents/agent-runner.ts</strong><br /><span className='text-[10px]'>ReAct loop orchestration</span></li>
-                    <li><strong className='text-foreground'>src/lib/agents/safe-calculator.ts</strong><br /><span className='text-[10px]'>AST math evaluator (no eval)</span></li>
-                    <li><strong className='text-foreground'>src/lib/agents/tools.ts</strong><br /><span className='text-[10px]'>JSON Schema tool registry</span></li>
-                    <li><strong className='text-foreground'>src/lib/agents/types.ts</strong><br /><span className='text-[10px]'>AgentTrace & Step contracts</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/lib/agents/agent-runner.ts</strong><br /><span className='text-xs text-muted-foreground'>ReAct loop orchestration</span></li>
+                    <li><strong className='text-foreground'>src/lib/agents/safe-calculator.ts</strong><br /><span className='text-xs text-muted-foreground'>AST math evaluator (no eval)</span></li>
+                    <li><strong className='text-foreground'>src/lib/agents/tools.ts</strong><br /><span className='text-xs text-muted-foreground'>JSON Schema tool registry</span></li>
+                    <li><strong className='text-foreground'>src/lib/agents/types.ts</strong><br /><span className='text-xs text-muted-foreground'>AgentTrace & Step contracts</span></li>
                   </ul>
                 </div>
 
                 {/* Module 2: RAG Pipeline */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <Database className='size-4' />
                     <span>RAG & Vector Engine</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/lib/rag/document-processor.ts</strong><br /><span className='text-[10px]'>Parsing ➔ Chunking ➔ Embed pipeline</span></li>
-                    <li><strong className='text-foreground'>src/lib/rag/chunker.ts</strong><br /><span className='text-[10px]'>800c/150o sliding window logic</span></li>
-                    <li><strong className='text-foreground'>src/lib/rag/embedder.ts</strong><br /><span className='text-[10px]'>Xenova all-MiniLM-L6-v2 embedder</span></li>
-                    <li><strong className='text-foreground'>src/lib/rag/vectorstore.ts</strong><br /><span className='text-[10px]'>ChromaDB cosine distance client</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/lib/rag/document-processor.ts</strong><br /><span className='text-xs text-muted-foreground'>Parsing ➔ Chunking ➔ Embed pipeline</span></li>
+                    <li><strong className='text-foreground'>src/lib/rag/chunker.ts</strong><br /><span className='text-xs text-muted-foreground'>800c/150o sliding window logic</span></li>
+                    <li><strong className='text-foreground'>src/lib/rag/embedder.ts</strong><br /><span className='text-xs text-muted-foreground'>Xenova all-MiniLM-L6-v2 embedder</span></li>
+                    <li><strong className='text-foreground'>src/lib/rag/vectorstore.ts</strong><br /><span className='text-xs text-muted-foreground'>ChromaDB cosine distance client</span></li>
                   </ul>
                 </div>
 
                 {/* Module 3: Storage & Durability */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <HardDrive className='size-4' />
                     <span>Storage & Durability</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/lib/rag/document-store.ts</strong><br /><span className='text-[10px]'>Atomic temp file JSON store</span></li>
-                    <li><strong className='text-foreground'>src/lib/rag/conversation-store.server.ts</strong><br /><span className='text-[10px]'>Multi-turn chat persistence</span></li>
-                    <li><strong className='text-foreground'>src/lib/storage/postgres.ts</strong><br /><span className='text-[10px]'>Optional SQL database adapter</span></li>
-                    <li><strong className='text-foreground'>src/lib/rag/title-generator.ts</strong><br /><span className='text-[10px]'>Semantic conversation titling</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/lib/rag/document-store.ts</strong><br /><span className='text-xs text-muted-foreground'>Atomic temp file JSON store</span></li>
+                    <li><strong className='text-foreground'>src/lib/rag/conversation-store.server.ts</strong><br /><span className='text-xs text-muted-foreground'>Multi-turn chat persistence</span></li>
+                    <li><strong className='text-foreground'>src/lib/storage/postgres.ts</strong><br /><span className='text-xs text-muted-foreground'>Optional SQL database adapter</span></li>
+                    <li><strong className='text-foreground'>src/lib/rag/title-generator.ts</strong><br /><span className='text-xs text-muted-foreground'>Semantic conversation titling</span></li>
                   </ul>
                 </div>
 
                 {/* Module 4: Auth & Security */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <Lock className='size-4' />
                     <span>Security & Identity</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/lib/auth/user-store.server.ts</strong><br /><span className='text-[10px]'>Scrypt crypto password hasher</span></li>
-                    <li><strong className='text-foreground'>src/lib/auth/auth-context.tsx</strong><br /><span className='text-[10px]'>Client useAuth() provider</span></li>
-                    <li><strong className='text-foreground'>src/app/api/auth/*</strong><br /><span className='text-[10px]'>HTTP-Only session routes</span></li>
-                    <li><strong className='text-foreground'>src/types/auth.ts</strong><br /><span className='text-[10px]'>User & Session TypeScript models</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/lib/auth/user-store.server.ts</strong><br /><span className='text-xs text-muted-foreground'>Scrypt crypto password hasher</span></li>
+                    <li><strong className='text-foreground'>src/lib/auth/auth-context.tsx</strong><br /><span className='text-xs text-muted-foreground'>Client useAuth() provider</span></li>
+                    <li><strong className='text-foreground'>src/app/api/auth/*</strong><br /><span className='text-xs text-muted-foreground'>HTTP-Only session routes</span></li>
+                    <li><strong className='text-foreground'>src/types/auth.ts</strong><br /><span className='text-xs text-muted-foreground'>User & Session TypeScript models</span></li>
                   </ul>
                 </div>
 
                 {/* Module 5: UI Pages */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <Globe className='size-4' />
                     <span>UI Pages (App Router)</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/app/page.tsx</strong><br /><span className='text-[10px]'>Dashboard & ReAct chat workspace</span></li>
-                    <li><strong className='text-foreground'>src/app/documents/page.tsx</strong><br /><span className='text-[10px]'>Knowledge base & PDF uploader</span></li>
-                    <li><strong className='text-foreground'>src/app/compare/page.tsx</strong><br /><span className='text-[10px]'>Cross-document comparison matrix</span></li>
-                    <li><strong className='text-foreground'>src/app/architecture/page.tsx</strong><br /><span className='text-[10px]'>This blueprint showcase page</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/app/page.tsx</strong><br /><span className='text-xs text-muted-foreground'>Dashboard & ReAct chat workspace</span></li>
+                    <li><strong className='text-foreground'>src/app/documents/page.tsx</strong><br /><span className='text-xs text-muted-foreground'>Knowledge base & PDF uploader</span></li>
+                    <li><strong className='text-foreground'>src/app/compare/page.tsx</strong><br /><span className='text-xs text-muted-foreground'>Cross-document comparison matrix</span></li>
+                    <li><strong className='text-foreground'>src/app/architecture/page.tsx</strong><br /><span className='text-xs text-muted-foreground'>This blueprint showcase page</span></li>
                   </ul>
                 </div>
 
                 {/* Module 6: Testing & QA */}
-                <div className='rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2.5'>
-                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-xs'>
+                <div className='rounded-xl border border-border/70 bg-muted/20 p-5 space-y-3'>
+                  <div className='flex items-center gap-2 text-primary font-sans font-bold text-sm sm:text-base'>
                     <CheckSquare className='size-4' />
                     <span>QA & Test Automation</span>
                   </div>
-                  <ul className='space-y-1.5 text-[11px] text-muted-foreground'>
-                    <li><strong className='text-foreground'>src/tests/auth.test.ts</strong><br /><span className='text-[10px]'>8 Vitest auth security tests</span></li>
-                    <li><strong className='text-foreground'>src/tests/document-upload-api.test.ts</strong><br /><span className='text-[10px]'>18 Vitest ingestion tests</span></li>
-                    <li><strong className='text-foreground'>scripts/verify_auth_e2e.mjs</strong><br /><span className='text-[10px]'>Playwright browser Edge tests</span></li>
-                    <li><strong className='text-foreground'>scripts/verify_architecture_page.mjs</strong><br /><span className='text-[10px]'>E2E architecture UI verification</span></li>
+                  <ul className='space-y-2.5 text-xs sm:text-sm text-muted-foreground'>
+                    <li><strong className='text-foreground'>src/tests/auth.test.ts</strong><br /><span className='text-xs text-muted-foreground'>8 Vitest auth security tests</span></li>
+                    <li><strong className='text-foreground'>src/tests/document-upload-api.test.ts</strong><br /><span className='text-xs text-muted-foreground'>18 Vitest ingestion tests</span></li>
+                    <li><strong className='text-foreground'>scripts/verify_auth_e2e.mjs</strong><br /><span className='text-xs text-muted-foreground'>Playwright browser Edge tests</span></li>
+                    <li><strong className='text-foreground'>scripts/verify_architecture_page.mjs</strong><br /><span className='text-xs text-muted-foreground'>E2E architecture UI verification</span></li>
                   </ul>
                 </div>
               </div>
@@ -945,73 +947,73 @@ export default function ArchitecturePage() {
             <Card className='border-border/80 bg-card p-6 sm:p-8 rounded-2xl space-y-6 shadow-md'>
               <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5'>
                 <div>
-                  <h2 className='text-base font-bold text-foreground flex items-center gap-2'>
-                    <DollarSign className='size-4 text-success' />
+                  <h2 className='text-lg sm:text-xl font-bold text-foreground flex items-center gap-2'>
+                    <DollarSign className='size-5 text-success' />
                     Total Cost of Ownership (TCO) & ROI Comparison
                   </h2>
-                  <p className='text-xs text-muted-foreground mt-0.5'>
+                  <p className='text-sm sm:text-base text-muted-foreground mt-1'>
                     How ResearchPilot AI delivers enterprise performance without recurring monthly commercial SaaS bills.
                   </p>
                 </div>
-                <div className='rounded-xl border border-success/30 bg-success/10 px-3.5 py-1.5 text-success font-bold text-xs font-mono'>
+                <div className='rounded-xl border border-success/30 bg-success/10 px-4 py-2 text-success font-extrabold text-sm sm:text-base font-mono'>
                   Estimated Annual Savings: $3,600 – $6,400+
                 </div>
               </div>
 
               {/* Pricing Table */}
               <div className='overflow-x-auto'>
-                <table className='w-full text-left text-xs'>
+                <table className='w-full text-left text-sm sm:text-base'>
                   <thead>
-                    <tr className='border-b border-border/80 text-muted-foreground font-semibold'>
-                      <th className='pb-3 pr-4'>Infrastructure Component</th>
-                      <th className='pb-3 px-4'>Commercial SaaS Stack</th>
-                      <th className='pb-3 px-4'>Estimated Monthly Cost</th>
-                      <th className='pb-3 pl-4 text-foreground'>ResearchPilot AI Stack</th>
-                      <th className='pb-3 pl-4 text-success'>ResearchPilot Cost</th>
+                    <tr className='border-b border-border/80 text-muted-foreground font-bold'>
+                      <th className='pb-4 pr-4'>Infrastructure Component</th>
+                      <th className='pb-4 px-4'>Commercial SaaS Stack</th>
+                      <th className='pb-4 px-4'>Estimated Monthly Cost</th>
+                      <th className='pb-4 pl-4 text-foreground'>ResearchPilot AI Stack</th>
+                      <th className='pb-4 pl-4 text-success'>ResearchPilot Cost</th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-border/60 text-muted-foreground'>
                     <tr>
-                      <td className='py-3.5 pr-4 font-semibold text-foreground'>Vector Database</td>
-                      <td className='py-3.5 px-4'>Pinecone / Qdrant Cloud Starter</td>
-                      <td className='py-3.5 px-4 text-destructive font-mono'>$70 - $120 / mo</td>
-                      <td className='py-3.5 pl-4 font-semibold text-foreground'>ChromaDB Local / In-Memory</td>
-                      <td className='py-3.5 pl-4 font-bold text-success font-mono'>$0.00</td>
+                      <td className='py-4 pr-4 font-semibold text-foreground'>Vector Database</td>
+                      <td className='py-4 px-4'>Pinecone / Qdrant Cloud Starter</td>
+                      <td className='py-4 px-4 text-destructive font-mono font-semibold'>$70 - $120 / mo</td>
+                      <td className='py-4 pl-4 font-semibold text-foreground'>ChromaDB Local / In-Memory</td>
+                      <td className='py-4 pl-4 font-extrabold text-success font-mono'>$0.00</td>
                     </tr>
                     <tr>
-                      <td className='py-3.5 pr-4 font-semibold text-foreground'>Vector Embeddings</td>
-                      <td className='py-3.5 px-4'>OpenAI text-embedding-3-large</td>
-                      <td className='py-3.5 px-4 text-destructive font-mono'>$30 - $80 / mo</td>
-                      <td className='py-3.5 pl-4 font-semibold text-foreground'>Xenova HuggingFace Transformers</td>
-                      <td className='py-3.5 pl-4 font-bold text-success font-mono'>$0.00</td>
+                      <td className='py-4 pr-4 font-semibold text-foreground'>Vector Embeddings</td>
+                      <td className='py-4 px-4'>OpenAI text-embedding-3-large</td>
+                      <td className='py-4 px-4 text-destructive font-mono font-semibold'>$30 - $80 / mo</td>
+                      <td className='py-4 pl-4 font-semibold text-foreground'>Xenova HuggingFace Transformers</td>
+                      <td className='py-4 pl-4 font-extrabold text-success font-mono'>$0.00</td>
                     </tr>
                     <tr>
-                      <td className='py-3.5 pr-4 font-semibold text-foreground'>Identity & Auth</td>
-                      <td className='py-3.5 px-4'>Auth0 / Clerk Pro Plan</td>
-                      <td className='py-3.5 px-4 text-destructive font-mono'>$35 - $100 / mo</td>
-                      <td className='py-3.5 pl-4 font-semibold text-foreground'>Node.js Crypto Scrypt + HTTP Cookies</td>
-                      <td className='py-3.5 pl-4 font-bold text-success font-mono'>$0.00</td>
+                      <td className='py-4 pr-4 font-semibold text-foreground'>Identity & Auth</td>
+                      <td className='py-4 px-4'>Auth0 / Clerk Pro Plan</td>
+                      <td className='py-4 px-4 text-destructive font-mono font-semibold'>$35 - $100 / mo</td>
+                      <td className='py-4 pl-4 font-semibold text-foreground'>Node.js Crypto Scrypt + HTTP Cookies</td>
+                      <td className='py-4 pl-4 font-extrabold text-success font-mono'>$0.00</td>
                     </tr>
                     <tr>
-                      <td className='py-3.5 pr-4 font-semibold text-foreground'>PDF Extraction SaaS</td>
-                      <td className='py-3.5 px-4'>LlamaParse / Unstructured.io</td>
-                      <td className='py-3.5 px-4 text-destructive font-mono'>$100 - $250 / mo</td>
-                      <td className='py-3.5 pl-4 font-semibold text-foreground'>pdfjs-dist Stream Parser</td>
-                      <td className='py-3.5 pl-4 font-bold text-success font-mono'>$0.00</td>
+                      <td className='py-4 pr-4 font-semibold text-foreground'>PDF Extraction SaaS</td>
+                      <td className='py-4 px-4'>LlamaParse / Unstructured.io</td>
+                      <td className='py-4 px-4 text-destructive font-mono font-semibold'>$100 - $250 / mo</td>
+                      <td className='py-4 pl-4 font-semibold text-foreground'>pdfjs-dist Stream Parser</td>
+                      <td className='py-4 pl-4 font-extrabold text-success font-mono'>$0.00</td>
                     </tr>
                     <tr>
-                      <td className='py-3.5 pr-4 font-semibold text-foreground'>Cloud File Storage</td>
-                      <td className='py-3.5 px-4'>AWS S3 + CloudFront Data Transfer</td>
-                      <td className='py-3.5 px-4 text-destructive font-mono'>$15 - $40 / mo</td>
-                      <td className='py-3.5 pl-4 font-semibold text-foreground'>Local Atomic Storage / Postgres</td>
-                      <td className='py-3.5 pl-4 font-bold text-success font-mono'>$0.00</td>
+                      <td className='py-4 pr-4 font-semibold text-foreground'>Cloud File Storage</td>
+                      <td className='py-4 px-4'>AWS S3 + CloudFront Data Transfer</td>
+                      <td className='py-4 px-4 text-destructive font-mono font-semibold'>$15 - $40 / mo</td>
+                      <td className='py-4 pl-4 font-semibold text-foreground'>Local Atomic Storage / Postgres</td>
+                      <td className='py-4 pl-4 font-extrabold text-success font-mono'>$0.00</td>
                     </tr>
-                    <tr className='bg-primary/5 font-semibold text-foreground text-sm'>
-                      <td className='py-4 pr-4'>Total Infrastructure Cost</td>
-                      <td className='py-4 px-4'>Commercial SaaS Stack</td>
-                      <td className='py-4 px-4 text-destructive font-mono'>$250 - $590 / mo</td>
-                      <td className='py-4 pl-4'>ResearchPilot AI Stack</td>
-                      <td className='py-4 pl-4 font-bold text-success font-mono'>$0.00 / mo</td>
+                    <tr className='bg-primary/10 font-bold text-foreground text-base sm:text-lg'>
+                      <td className='py-4 sm:py-5 pr-4 font-extrabold'>Total Infrastructure Cost</td>
+                      <td className='py-4 sm:py-5 px-4 font-semibold'>Commercial SaaS Stack</td>
+                      <td className='py-4 sm:py-5 px-4 text-destructive font-mono font-bold'>$250 - $590 / mo</td>
+                      <td className='py-4 sm:py-5 pl-4 font-extrabold'>ResearchPilot AI Stack</td>
+                      <td className='py-4 sm:py-5 pl-4 font-extrabold text-success text-lg sm:text-xl font-mono'>$0.00 / mo</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1021,23 +1023,23 @@ export default function ArchitecturePage() {
         )}
 
         {/* Footer Navigation Bar */}
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-border/80 bg-card p-6 shadow-sm'>
-          <div className='space-y-1'>
-            <p className='text-sm font-bold text-foreground'>Ready to Experience the Live Agent?</p>
-            <p className='text-xs text-muted-foreground'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 rounded-2xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm'>
+          <div className='space-y-1.5'>
+            <p className='text-base sm:text-lg font-bold text-foreground'>Ready to Experience the Live Agent?</p>
+            <p className='text-xs sm:text-sm text-muted-foreground'>
               Test the ReAct loop live with real financial disclosures, inspect citations, or configure settings.
             </p>
           </div>
-          <div className='flex items-center gap-2.5'>
+          <div className='flex items-center gap-3'>
             <Link href='/'>
-              <Button size='sm' className='gap-2 text-xs shadow-md'>
+              <Button size='default' className='gap-2 text-sm sm:text-base font-semibold px-5 py-2.5 shadow-md'>
                 Launch Research Chat
-                <ArrowRight className='size-3.5' />
+                <ArrowRight className='size-4' />
               </Button>
             </Link>
             <Link href='/documents'>
-              <Button variant='outline' size='sm' className='gap-2 text-xs'>
-                <FileText className='size-3.5' />
+              <Button variant='outline' size='default' className='gap-2 text-sm sm:text-base font-semibold px-5 py-2.5'>
+                <FileText className='size-4' />
                 Document Knowledge Base
               </Button>
             </Link>
