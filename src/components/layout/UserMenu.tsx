@@ -10,6 +10,7 @@ import {
   User as UserIcon,
   LogOut,
   Settings,
+  Layers,
   Shield,
   LogIn,
   UserPlus,
@@ -103,6 +104,14 @@ export function UserMenu() {
 
           {/* Links */}
           <div className='space-y-0.5 py-1.5'>
+            <Link
+              href='/architecture'
+              onClick={() => setOpen(false)}
+              className='flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors'
+            >
+              <Layers className='size-3.5' />
+              Architecture & Specs
+            </Link>
             <Link
               href='/settings'
               onClick={() => setOpen(false)}

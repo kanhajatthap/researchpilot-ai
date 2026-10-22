@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Brand } from './Brand';
-import { FileText, GitCompare, History, LayoutDashboard, Library, Menu, Settings, Sparkles } from 'lucide-react';
+import { FileText, GitCompare, History, Layers, LayoutDashboard, Library, Menu, Settings, Sparkles } from 'lucide-react';
 
 export interface SidebarProps {
   className?: string;
@@ -91,7 +91,20 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
       </div>
 
-      <div className='border-t border-border/70 p-3'>
+      <div className='border-t border-border/70 p-3 space-y-1'>
+        <Link
+          href='/architecture'
+          className={cn(
+            'flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors',
+            pathname === '/architecture'
+              ? 'bg-primary/10 text-foreground'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          )}
+          aria-current={pathname === '/architecture' ? 'page' : undefined}
+        >
+          <Layers className='size-4' />
+          Architecture & Specs
+        </Link>
         <Link
           href='/settings'
           className={cn(
