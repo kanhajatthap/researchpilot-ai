@@ -38,8 +38,8 @@ async function ensureStore(): Promise<UserStoreData> {
 
     const demoUser: StoredUser = {
       id: 'usr_demo_001',
-      name: 'Kanha Jatthap',
-      email: 'kanhajatthap@gmail.com',
+      name: 'Admin Lead',
+      email: 'admin@researchpilot.ai',
       role: 'admin',
       createdAt: new Date().toISOString(),
       salt: salt1,

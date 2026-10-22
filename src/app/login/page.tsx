@@ -156,11 +156,11 @@ export default function LoginPage() {
             <div className='flex flex-col gap-1.5 sm:flex-row'>
               <button
                 type='button'
-                onClick={() => handleQuickDemo('kanhajatthap@gmail.com')}
+                onClick={() => handleQuickDemo('admin@researchpilot.ai')}
                 className='flex-1 rounded-md border border-border/70 bg-card px-2.5 py-1 text-left text-xs hover:border-foreground/20 hover:bg-muted transition-colors'
               >
-                <p className='font-semibold text-foreground text-[11px]'>Kanha Jatthap</p>
-                <p className='text-[10px] text-muted-foreground'>kanhajatthap@gmail.com</p>
+                <p className='font-semibold text-foreground text-[11px]'>Admin Lead</p>
+                <p className='text-[10px] text-muted-foreground'>admin@researchpilot.ai</p>
               </button>
               <button
                 type='button'

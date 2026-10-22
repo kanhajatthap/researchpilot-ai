@@ -3,10 +3,10 @@ import { userStore } from '@/lib/auth/user-store.server';
 
 describe('User Authentication & Store System', () => {
   it('authenticates seeded admin user with correct credentials', async () => {
-    const user = await userStore.authenticate('kanhajatthap@gmail.com', 'Password123!');
+    const user = await userStore.authenticate('admin@researchpilot.ai', 'Password123!');
     expect(user).not.toBeNull();
-    expect(user?.email).toBe('kanhajatthap@gmail.com');
-    expect(user?.name).toBe('Kanha Jatthap');
+    expect(user?.email).toBe('admin@researchpilot.ai');
+    expect(user?.name).toBe('Admin Lead');
     expect(user?.role).toBe('admin');
     // Ensure sensitive security fields are not leaked
     expect((user as any).passwordHash).toBeUndefined();
@@ -14,7 +14,7 @@ describe('User Authentication & Store System', () => {
   });
 
   it('rejects authentication with invalid password', async () => {
-    const user = await userStore.authenticate('kanhajatthap@gmail.com', 'WrongPassword!');
+    const user = await userStore.authenticate('admin@researchpilot.ai', 'WrongPassword!');
     expect(user).toBeNull();
   });
 
@@ -48,7 +48,7 @@ describe('User Authentication & Store System', () => {
   });
 
   it('creates, resolves, and invalidates session tokens', async () => {
-    const user = await userStore.findByEmail('kanhajatthap@gmail.com');
+    const user = await userStore.findByEmail('admin@researchpilot.ai');
     expect(user).not.toBeNull();
 
     const sessionToken = await userStore.createSession(user!.id);
