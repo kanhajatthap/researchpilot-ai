@@ -7,6 +7,7 @@ import type { Citation, Message } from '@/types/chat';
 import { Check, Copy, FileText, Sparkles, User } from 'lucide-react';
 import { RenderedMessage } from './RenderedMessage';
 import { AgentStepAccordion } from './AgentStepAccordion';
+import { DataVisualizer } from './DataVisualizer';
 
 export interface ChatMessageProps {
   message: Message;
@@ -109,6 +110,10 @@ export function ChatMessage({
             <span className='rp-dot ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 rounded-[1px] bg-foreground/70 align-middle' aria-hidden />
           )}
         </div>
+
+        {isAssistant && !isStreaming && (
+          <DataVisualizer content={message.content} />
+        )}
 
         {visibleCitations.length > 0 && (
           <div className='mt-1.5 flex flex-wrap gap-1.5'>

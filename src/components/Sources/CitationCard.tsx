@@ -1,18 +1,26 @@
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import type { Citation } from '@/types/document';
 
 export interface CitationCardProps {
   citation: Citation;
   index: number;
   showExcerpt?: boolean;
+  onClick?: () => void;
 }
 
-export function CitationCard({ citation, index, showExcerpt = true }: CitationCardProps) {
+export function CitationCard({ citation, index, showExcerpt = true, onClick }: CitationCardProps) {
   // Use the actual excerpt from the citation if available, otherwise show a placeholder
   const excerpt = citation.excerpt || 'Supporting content from the source document.';
 
   return (
-    <div className='rounded-lg border border-border/70 bg-background/40 px-2.5 py-2 transition-colors hover:border-foreground/20'>
+    <div
+      onClick={onClick}
+      className={cn(
+        'rounded-lg border border-border/70 bg-background/40 px-2.5 py-2 transition-colors hover:border-foreground/20',
+        onClick && 'cursor-pointer hover:bg-muted/40'
+      )}
+    >
       <div className='flex items-center gap-2'>
         <span className='flex size-4 shrink-0 items-center justify-center rounded bg-muted-foreground/15 text-[10px] font-semibold tabular-nums text-foreground/80'>
           {index}

@@ -11,12 +11,14 @@ export interface SourcePanelProps {
   citations?: Citation[];
   className?: string;
   defaultExpanded?: boolean;
+  onSourceClick?: (citation: Citation) => void;
 }
 
 export function SourcePanel({
   citations,
   className,
   defaultExpanded = false,
+  onSourceClick,
 }: SourcePanelProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const validCitations = (citations || []).filter((c) => c.documentId && c.chunkId);
@@ -78,6 +80,7 @@ export function SourcePanel({
                 key={citation.chunkId || citation.id}
                 citation={citation}
                 index={index + 1}
+                onClick={() => onSourceClick?.(citation)}
               />
             ))}
           </div>

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Brand } from './Brand';
-import { FileText, History, LayoutDashboard, Library, Menu, Settings, Sparkles } from 'lucide-react';
+import { FileText, GitCompare, History, LayoutDashboard, Library, Menu, Settings, Sparkles } from 'lucide-react';
 
 export interface SidebarProps {
   className?: string;
@@ -21,6 +21,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Research', icon: LayoutDashboard, href: '/' },
   { label: 'Documents', icon: FileText, href: '/documents' },
+  { label: 'Compare', icon: GitCompare, href: '/compare' },
   { label: 'Sources', icon: Library, href: '/sources' },
   { label: 'History', icon: History, href: '/history' },
 ];

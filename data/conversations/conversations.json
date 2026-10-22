@@ -1614,6 +1614,178 @@
       ],
       "createdAt": "2026-10-21T11:39:52.376Z",
       "updatedAt": "2026-10-21T11:40:06.493Z"
+    },
+    "a2357b84-c282-4b42-b909-9b7851e103b3": {
+      "id": "a2357b84-c282-4b42-b909-9b7851e103b3",
+      "title": "What was Tesla's total automotive",
+      "messages": [
+        {
+          "id": "msg-1792647473914-user",
+          "role": "user",
+          "content": "What was Tesla's total automotive revenue in 2024?",
+          "createdAt": "2026-10-22T05:37:53.914Z"
+        },
+        {
+          "id": "msg-1792647473915-assistant",
+          "role": "assistant",
+          "content": "According to Tesla’s 2024 Form 10-K (Note 20 / Item 7, \"Results of Operations\"), Tesla's total automotive revenue for the year ended December 31, 2024, was **$77,070 million ($77.07 billion)**.\n\n### Breakdown of Automotive Revenue (in millions)\n\n* **Automotive Sales:** $72,480 million\n* **Automotive Regulatory Credits:** $2,763 million\n* **Automotive Leasing:** $1,827 million\n* **Total Automotive Revenue:** **$77,070 million**\n\n*(Source: Tesla, Inc. Annual Report / Form 10-K for the year ended December 31, 2024, pages 40 and 58).*",
+          "citations": [
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c169",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 41,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c169"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c166",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 40,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c166"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c219",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 58,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c219"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c168",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 41,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c168"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c164",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 40,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c164"
+            }
+          ],
+          "agentTrace": {
+            "id": "trace-1792647473914",
+            "steps": [
+              {
+                "id": "step-1792647467918-fhe3",
+                "label": "Knowledge Base",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:37:47.918Z",
+                "message": "Completed in 1ms"
+              },
+              {
+                "id": "step-1792647471374-qnei",
+                "label": "Document Search",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:37:51.374Z",
+                "message": "Found 5 relevant excerpts"
+              },
+              {
+                "id": "step-1792647472431-e992",
+                "label": "Calculator",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:37:52.431Z",
+                "message": "72480 + 2763 + 1827 = 77070"
+              }
+            ],
+            "startedAt": "2026-10-22T05:37:47.063Z",
+            "completedAt": "2026-10-22T05:37:53.914Z",
+            "totalDurationMs": 6851
+          },
+          "createdAt": "2026-10-22T05:37:53.915Z"
+        }
+      ],
+      "createdAt": "2026-10-22T05:37:46.873Z",
+      "updatedAt": "2026-10-22T05:37:53.915Z"
+    },
+    "99eecdf6-e98e-4a61-b134-706c346d0030": {
+      "id": "99eecdf6-e98e-4a61-b134-706c346d0030",
+      "title": "What was Tesla's total automotive",
+      "messages": [
+        {
+          "id": "msg-1792647526091-user",
+          "role": "user",
+          "content": "What was Tesla's total automotive revenue in 2024?",
+          "createdAt": "2026-10-22T05:38:46.091Z"
+        },
+        {
+          "id": "msg-1792647526091-assistant",
+          "role": "assistant",
+          "content": "According to Tesla’s 2024 Form 10-K (Note 21 / Results of Operations), Tesla’s total automotive revenue for the year ended December 31, 2024, was **$77,070 million** (or **$77.07 billion**). \n\nHere is the detailed breakdown of the automotive revenue components (in millions):\n\n* **Automotive sales:** $72,480 million\n* **Automotive regulatory credits:** $2,763 million\n* **Automotive leasing:** $1,827 million\n* **Total Automotive Revenue:** **$77,070 million**\n\n***\n\n*Reference: Tesla, Inc. Annual Report (Form 10-K for the year ended December 31, 2024), Pages 40 and 58.*",
+          "citations": [
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c169",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 41,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c169"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c166",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 40,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c166"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c219",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 58,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c219"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c168",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 41,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c168"
+            },
+            {
+              "id": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c164",
+              "documentId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e",
+              "documentName": "tsla-20241231-gen",
+              "pageNumber": 40,
+              "chunkId": "e94a1ed1-31f9-4b37-8be5-1a9e1a02b28e_c164"
+            }
+          ],
+          "agentTrace": {
+            "id": "trace-1792647526091",
+            "steps": [
+              {
+                "id": "step-1792647521133-zdaa",
+                "label": "Knowledge Base",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:38:41.133Z",
+                "message": "Completed in 0ms"
+              },
+              {
+                "id": "step-1792647523674-zpg6",
+                "label": "Document Search",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:38:43.674Z",
+                "message": "Found 5 relevant excerpts"
+              },
+              {
+                "id": "step-1792647524543-od7u",
+                "label": "Calculator",
+                "status": "completed",
+                "timestamp": "2026-10-22T05:38:44.543Z",
+                "message": "72480 + 2763 + 1827 = 77070"
+              }
+            ],
+            "startedAt": "2026-10-22T05:38:40.377Z",
+            "completedAt": "2026-10-22T05:38:46.091Z",
+            "totalDurationMs": 5714
+          },
+          "createdAt": "2026-10-22T05:38:46.091Z"
+        }
+      ],
+      "createdAt": "2026-10-22T05:38:40.347Z",
+      "updatedAt": "2026-10-22T05:38:46.091Z"
     }
   }
 }

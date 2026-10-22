@@ -10,6 +10,7 @@ import { ChatComposer } from './ChatComposer';
 import { SuggestedQuestions } from './SuggestedQuestions';
 import { ConversationPanel } from './ConversationPanel';
 import { SourcePanel } from '@/components/Sources/SourcePanel';
+import { DocumentViewerDrawer } from '@/components/Documents/DocumentViewerDrawer';
 import { ErrorState } from '@/components/common';
 import { cn } from '@/lib/utils';
 import { useConversationStore } from '@/lib/chat-context';
@@ -55,6 +56,7 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [scopeExpanded, setScopeExpanded] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [inspectingCitation, setInspectingCitation] = useState<Citation | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inFlightRef = useRef(false);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -550,7 +552,7 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
                 <ChatMessage
                   key={message.id}
                   message={message}
-                  onSourceClick={() => {}}
+                  onSourceClick={(citation) => setInspectingCitation(citation)}
                   existingDocumentIds={existingDocumentIds}
                   isStreaming={
                     isLoading &&
@@ -690,7 +692,12 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
           )}
 
           {lastMessageCitations && lastMessageCitations.length > 0 && (
-            <SourcePanel citations={lastMessageCitations} className='w-full' defaultExpanded={false} />
+            <SourcePanel
+              citations={lastMessageCitations}
+              className='w-full'
+              defaultExpanded={false}
+              onSourceClick={(c) => setInspectingCitation(c as Citation)}
+            />
           )}
 
           <ChatComposer onSend={handleSend} isLoading={isLoading} />
@@ -700,6 +707,13 @@ export function ChatWorkspace({ className, onAgentTrace }: ChatWorkspaceProps) {
           </p>
         </div>
       </footer>
+
+      {/* Side-by-side Document & Citation Viewer Drawer */}
+      <DocumentViewerDrawer
+        citation={inspectingCitation}
+        onClose={() => setInspectingCitation(null)}
+        onAskAboutPage={(prompt) => handleSend(prompt)}
+      />
     </Card>
   );
 }

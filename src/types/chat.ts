@@ -19,6 +19,7 @@ export interface Citation {
   pageNumber?: number;
   chunkId: string;
   reason?: string;
+  excerpt?: string;
 }
 
 export interface Message {
