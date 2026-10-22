@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { APP_CONFIG } from "@/lib/constants";
@@ -30,6 +30,8 @@ export const metadata: Metadata = {
  */
 const themeInitScript = `(function(){try{var t=localStorage.getItem('rp-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}var e=document.documentElement;e.classList.remove('light','dark');e.classList.add(t);e.style.colorScheme=t;}catch(e){}})();`;
 
+import { AuthProvider } from "@/lib/auth/auth-context";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -41,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

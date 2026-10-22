@@ -5,6 +5,7 @@ import { APP_CONFIG } from '@/lib/constants';
 import { CircleUser } from 'lucide-react';
 import { Brand } from './Brand';
 import { SidebarMobile } from './Sidebar';
+import { UserMenu } from './UserMenu';
 
 export function Header() {
   return (
@@ -24,9 +25,7 @@ export function Header() {
             Ready
           </span>
           <ThemeToggle />
-          <Button variant='ghost' size='icon-sm' className='rounded-full' aria-label='Account menu' title='Account'>
-            <CircleUser />
-          </Button>
+          <UserMenu />
         </div>
       </div>
     </header>

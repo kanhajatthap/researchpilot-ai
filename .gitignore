@@ -40,9 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# runtime data (local vector store + uploaded document files) - not source
+# runtime data (local vector store + uploaded document files + user store) - not source
 /data/chroma/
 /data/documents/files/
+/data/users/
 
 # screenshots and test logs
 *.png
