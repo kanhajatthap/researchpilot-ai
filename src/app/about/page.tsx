@@ -328,6 +328,18 @@ export default function AboutPage() {
                 subscription behind it.
               </p>
             </div>
+            <div className='mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-4'>
+              <p className='text-[11px] text-muted-foreground'>
+                Curious how the pieces fit together?
+              </p>
+              <Link
+                href='/architecture'
+                className='inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline'
+              >
+                Read the architecture
+                <ArrowRight className='size-3.5' />
+              </Link>
+            </div>
           </Card>
 
           <div className='grid gap-3 sm:gap-4'>
