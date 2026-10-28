@@ -7,7 +7,7 @@ import type { NextRequest } from 'next/server';
  *
  * Rule: Nobody can access the research platform without logging in.
  *
- * 1. Public Pages: /login, /register, /forgot-password, /reset-password, /architecture
+ * 1. Public Pages: /login, /register, /forgot-password, /reset-password, /architecture, /about
  * 2. Protected Pages: /, /documents, /compare, /sources, /history, /settings
  *    -> Redirects unauthenticated visitors immediately to /login.
  * 3. Logged-in Users:
@@ -21,6 +21,7 @@ const PUBLIC_PAGE_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/architecture',
+  '/about',
 ];
 
 export function proxy(request: NextRequest) {

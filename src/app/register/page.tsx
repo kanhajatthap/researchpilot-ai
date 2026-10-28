@@ -251,6 +251,11 @@ export default function RegisterPage() {
             Sign in
           </Link>
         </p>
+        <p className='text-center text-[11px] text-muted-foreground'>
+          <Link href='/about' className='hover:text-foreground hover:underline'>
+            About this project &amp; the author
+          </Link>
+        </p>
         <BuiltBy />
       </div>
     </div>

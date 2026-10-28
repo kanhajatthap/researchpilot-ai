@@ -6,6 +6,8 @@
   /** Author / builder credited throughout the UI and metadata. */
   author: string;
   authorUrl: string;
+  /** Public source repository, linked from the About page. */
+  repositoryUrl: string;
 }
 
 export const APP_CONFIG: AppConfig = {
@@ -15,4 +17,5 @@ export const APP_CONFIG: AppConfig = {
   version: '0.1.0',
   author: 'Kanha Jatthap',
   authorUrl: 'https://github.com/kanhajatthap',
+  repositoryUrl: 'https://github.com/kanhajatthap/researchpilot-ai',
 };

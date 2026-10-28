@@ -11,6 +11,7 @@ import {
   LogOut,
   Settings,
   Layers,
+  Info,
   Shield,
   LogIn,
   UserPlus,
@@ -104,6 +105,14 @@ export function UserMenu() {
 
           {/* Links */}
           <div className='space-y-0.5 py-1.5'>
+            <Link
+              href='/about'
+              onClick={() => setOpen(false)}
+              className='flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors'
+            >
+              <Info className='size-3.5' />
+              About the Project
+            </Link>
             <Link
               href='/architecture'
               onClick={() => setOpen(false)}
