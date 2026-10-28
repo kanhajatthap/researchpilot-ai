@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Brand } from './Brand';
+import { BuiltBy } from './BuiltBy';
 import { FileText, GitCompare, History, Layers, LayoutDashboard, Library, Menu, Settings, Sparkles } from 'lucide-react';
 
 export interface SidebarProps {
@@ -118,6 +119,7 @@ export function Sidebar({ className }: SidebarProps) {
           <Settings className='size-4' />
           Settings
         </Link>
+        <BuiltBy className='px-2.5 pt-2 text-left' />
       </div>
     </aside>
   );

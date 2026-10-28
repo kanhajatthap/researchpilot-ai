@@ -15,6 +15,28 @@ const nextConfig: NextConfig = {
    * `chromadb` is a server-only HTTP client and is safest left unbundled too.
    */
   serverExternalPackages: ["pdfjs-dist", "chromadb", "pg"],
+
+  /**
+   * `pdfjs-dist` resolves its worker with a runtime dynamic `import()` that
+   * Next's output file tracing cannot see. On Vercel the package itself is
+   * present in `/var/task/node_modules` but the worker file was not, so every
+   * PDF upload failed with:
+   *
+   *   Setting up fake worker failed: Cannot find module
+   *   '/var/task/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'
+   *
+   * Ship the worker (and standard fonts) with the routes that parse PDFs.
+   */
+  outputFileTracingIncludes: {
+    "/api/documents": [
+      "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+      "./node_modules/pdfjs-dist/standard_fonts/**/*",
+    ],
+    "/api/documents/**": [
+      "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+      "./node_modules/pdfjs-dist/standard_fonts/**/*",
+    ],
+  },
 };
 
 export default nextConfig;

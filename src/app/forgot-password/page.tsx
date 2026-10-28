@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Brand } from '@/components/layout/Brand';
+import { BuiltBy } from '@/components/layout/BuiltBy';
 import {
   Mail,
   ArrowLeft,
@@ -156,6 +157,7 @@ export default function ForgotPasswordPage() {
             </Link>
           </p>
         )}
+        <BuiltBy />
       </div>
     </div>
   );

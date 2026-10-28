@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { APP_CONFIG } from '@/lib/constants';
 import {
   Settings,
   Cpu,
@@ -306,6 +307,17 @@ export default function SettingsPage() {
             <div className='flex items-center justify-between p-4 text-xs'>
               <span className='text-muted-foreground'>License &amp; Usage</span>
               <span className='text-foreground font-medium'>100% Free &amp; Open Source</span>
+            </div>
+            <div className='flex items-center justify-between p-4 text-xs'>
+              <span className='text-muted-foreground'>Designed &amp; Built by</span>
+              <a
+                href={APP_CONFIG.authorUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='font-semibold text-foreground underline-offset-2 hover:underline'
+              >
+                {APP_CONFIG.author}
+              </a>
             </div>
           </Card>
         </div>

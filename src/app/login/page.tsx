@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Brand } from '@/components/layout/Brand';
+import { BuiltBy } from '@/components/layout/BuiltBy';
 import { useAuth } from '@/lib/auth/auth-context';
 import {
   Sparkles,
@@ -183,6 +184,7 @@ export default function LoginPage() {
             Create an account
           </Link>
         </p>
+        <BuiltBy />
       </div>
     </div>
   );

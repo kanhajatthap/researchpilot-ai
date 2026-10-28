@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth/auth-context';
+import { BuiltBy } from './BuiltBy';
 import {
   User as UserIcon,
   LogOut,
@@ -131,6 +132,11 @@ export function UserMenu() {
               <LogOut className='size-3.5' />
               Sign Out
             </button>
+          </div>
+
+          {/* Author credit */}
+          <div className='mt-1 border-t border-border/60 px-2.5 pt-2 pb-0.5'>
+            <BuiltBy className='text-left text-[10px]' />
           </div>
         </div>
       )}

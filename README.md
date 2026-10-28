@@ -1,5 +1,7 @@
 # ResearchPilot AI
 
+**Built by [Kanha Jatthap](https://github.com/kanhajatthap).**
+
 An Agentic AI Research Assistant powered by RAG, LangChain & LangGraph. This repository contains a premium Next.js UI and a Gemini-powered chat endpoint.
 
 ## Phase 3: Gemini API Integration & Working Chatbot

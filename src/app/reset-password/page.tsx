@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Brand } from '@/components/layout/Brand';
+import { BuiltBy } from '@/components/layout/BuiltBy';
 import {
   Lock,
   KeyRound,
@@ -202,6 +203,7 @@ export default function ResetPasswordPage() {
             Back to Sign In
           </Link>
         </p>
+        <BuiltBy />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Brand } from '@/components/layout/Brand';
+import { BuiltBy } from '@/components/layout/BuiltBy';
 import { useAuth } from '@/lib/auth/auth-context';
 import {
   Sparkles,
@@ -250,6 +251,7 @@ export default function RegisterPage() {
             Sign in
           </Link>
         </p>
+        <BuiltBy />
       </div>
     </div>
   );

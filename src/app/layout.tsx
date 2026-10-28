@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://researchpilot-ai.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://researchpilot-ai-zeta.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
     "Page-level Citations",
     "Zero-Cost AI Architecture",
   ],
-  authors: [{ name: "ResearchPilot AI Team", url: "https://github.com/kanhajatthap/researchpilot-ai" }],
-  creator: "ResearchPilot AI",
-  publisher: "ResearchPilot AI",
+  authors: [{ name: APP_CONFIG.author, url: APP_CONFIG.authorUrl }],
+  creator: APP_CONFIG.author,
+  publisher: APP_CONFIG.author,
   category: "Business & Financial Intelligence",
   alternates: {
     canonical: "/",
@@ -92,6 +92,16 @@ const jsonLdSchema = {
     "Enterprise Autonomous Financial & Academic Research Agent with 100% page-grounded citations and ReAct reasoning loop.",
   applicationCategory: "BusinessApplication, FinanceApplication",
   operatingSystem: "All",
+  author: {
+    "@type": "Person",
+    name: APP_CONFIG.author,
+    url: APP_CONFIG.authorUrl,
+  },
+  creator: {
+    "@type": "Person",
+    name: APP_CONFIG.author,
+    url: APP_CONFIG.authorUrl,
+  },
   offers: {
     "@type": "Offer",
     price: "0",
