@@ -64,12 +64,22 @@ export function resolveEmbeddingContentsPerMinute(): number {
 /**
  * Overall per-document processing timeout, from `DOCUMENT_PROCESSING_TIMEOUT_MS`.
  *
- * The default is unchanged (5 minutes). Because the provider paces large
+ * The default is unchanged (25 minutes). Because the provider paces large
  * documents (quota-limited), a longer value may be set deliberately for large
  * PDFs on rate-limited plans.
+ *
+ * On Vercel the function is hard-killed at `maxDuration` (300s in the route
+ * handlers), which would leave the record stuck in `processing` with no error.
+ * Use a slightly shorter internal deadline there so the pipeline can abort,
+ * mark the document failed, and offer a retry before the platform kills it.
  */
 export function resolveProcessingTimeoutMs(): number {
-  return readPositiveIntEnv('DOCUMENT_PROCESSING_TIMEOUT_MS', DEFAULT_PROCESSING_TIMEOUT_MS);
+  const vercelBudgetMs = 300_000;
+  const safetyMarginMs = 45_000;
+  const fallback = process.env.VERCEL
+    ? vercelBudgetMs - safetyMarginMs
+    : DEFAULT_PROCESSING_TIMEOUT_MS;
+  return readPositiveIntEnv('DOCUMENT_PROCESSING_TIMEOUT_MS', fallback);
 }
 
 function readPositiveIntEnv(name: string, fallback: number): number {

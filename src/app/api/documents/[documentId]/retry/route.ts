@@ -14,6 +14,8 @@ import {
 } from '@/lib/rag/embedding-config';
 
 export const runtime = 'nodejs';
+/** Retrying a large PDF needs the same budget as the initial upload. */
+export const maxDuration = 300;
 
 const PROCESSING_TIMEOUT_MS = resolveProcessingTimeoutMs();
 const EMBEDDING_CONTENTS_PER_MINUTE = resolveEmbeddingContentsPerMinute();

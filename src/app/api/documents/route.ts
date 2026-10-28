@@ -15,6 +15,8 @@ import { createHash } from 'crypto';
 import { purgeDocumentVectors, vectorPurgeFailureMessages } from '@/lib/rag/vectorstore';
 
 export const runtime = 'nodejs';
+/** Large PDFs need the full serverless budget for embeddings + vector writes. */
+export const maxDuration = 300;
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const PROCESSING_TIMEOUT_MS = resolveProcessingTimeoutMs();
