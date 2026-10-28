@@ -51,20 +51,22 @@ Set these in **Vercel → Project → Settings → Environment Variables** (Prod
 | `CHROMA_TENANT` | Chroma Cloud tenant | From the Chroma Cloud dashboard |
 | `CHROMA_DATABASE` | Chroma Cloud database name | e.g. `researchpilot` |
 | `CHROMA_HOST` | `api.trychroma.com` | Defaults to this when `CHROMA_API_KEY` is set |
-| `DATABASE_URL` | Postgres connection string | Vercel Postgres / Neon; stores document + conversation state |
+| `DATABASE_URL` | Postgres connection string | Vercel Postgres / Neon; stores document, conversation, and user account state |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token | Stores uploaded PDFs (private blobs) |
 | `STORAGE_DRIVER` | `vercel` or `fs` | Optional override; auto-detected when Postgres + Blob are set |
 
-Optional: `GEMINI_MODEL`, `EMBEDDINGS_CONTENTS_PER_MINUTE`, `DOCUMENT_PROCESSING_TIMEOUT_MS`.
+Optional: `GEMINI_MODEL`, `EMBEDDINGS_CONTENTS_PER_MINUTE`, `DOCUMENT_PROCESSING_TIMEOUT_MS`, `USER_STORE_PATH`.
 
 ### Storage
 
 Two drivers are supported and selected automatically:
 
-- **`fs`** (default) — document metadata in `data/documents/documents.json`, conversations in `data/conversations/conversations.json`, PDFs under `data/documents/files`. Used for local development, tests, and hosts with a writable persistent disk (Railway/Render with a volume).
-- **`vercel`** — document/conversation state in Postgres (`app_state` JSONB table, created automatically) and PDFs in a private Vercel Blob store. Mutations run in a Postgres transaction with `SELECT ... FOR UPDATE`, so concurrent serverless invocations do not lose updates.
+- **`fs`** (default) — document metadata in `data/documents/documents.json`, conversations in `data/conversations/conversations.json`, user accounts/sessions in `data/users/users.json`, PDFs under `data/documents/files`. Used for local development, tests, and hosts with a writable persistent disk (Railway/Render with a volume).
+- **`vercel`** — document/conversation/account state in Postgres (`app_state` JSONB table, created automatically) and PDFs in a private Vercel Blob store. Mutations run in a Postgres transaction with `SELECT ... FOR UPDATE`, so concurrent serverless invocations do not lose updates.
 
 `STORAGE_DRIVER=vercel` is chosen automatically when both `DATABASE_URL` (or `POSTGRES_URL`) and `BLOB_READ_WRITE_TOKEN` are present. Force either driver with `STORAGE_DRIVER`.
+
+User accounts only need Postgres, so setting `DATABASE_URL` (without a Blob token) is enough to keep sign-up, login, and sessions working on serverless hosts. Without a database, Vercel's read-only filesystem cannot persist accounts and the auth endpoints return a 503 explaining the missing configuration.
 
 To move existing local data (JSON stores + PDFs) into Postgres/Blob, run once with both variables exported:
 

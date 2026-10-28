@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/auth/user-store.server';
+import {
+  AuthStorageError,
+  assertAuthStorageReady,
+  userStore,
+} from '@/lib/auth/user-store.server';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    assertAuthStorageReady();
+
     const body = await req.json();
     const { token, newPassword } = body;
 
@@ -36,6 +42,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Reset password error:', error);
+    if (error instanceof AuthStorageError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
     return NextResponse.json(
       { error: 'An unexpected error occurred during password reset.' },
       { status: 500 }

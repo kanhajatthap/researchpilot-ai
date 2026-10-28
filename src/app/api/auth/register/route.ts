@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/auth/user-store.server';
+import {
+  AuthStorageError,
+  assertAuthStorageReady,
+  userStore,
+} from '@/lib/auth/user-store.server';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    assertAuthStorageReady();
+
     const body = await req.json();
     const { name, email, password } = body;
 
@@ -49,10 +55,18 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error);
+    if (error instanceof AuthStorageError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
     return NextResponse.json(
-      { error: error.message || 'An error occurred during registration.' },
+      {
+        error:
+          error instanceof Error && error.message
+            ? error.message
+            : 'An error occurred during registration.',
+      },
       { status: 400 }
     );
   }

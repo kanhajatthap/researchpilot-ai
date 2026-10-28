@@ -6,11 +6,12 @@
  *
  *   npm run migrate:storage
  *
- * - Reads data/documents/documents.json and data/conversations/conversations.json
- *   (or DOCUMENT_STORE_PATH / CONVERSATION_STORE_PATH overrides).
+ * - Reads data/documents/documents.json, data/conversations/conversations.json,
+ *   and data/users/users.json (or DOCUMENT_STORE_PATH / CONVERSATION_STORE_PATH /
+ *   USER_STORE_PATH overrides).
  * - Uploads each stored PDF to the private Blob store and rewrites `filePath`
  *   to the resulting blob URL.
- * - Upserts both JSON documents into the `app_state` table used at runtime.
+ * - Upserts all JSON documents into the `app_state` table used at runtime.
  *
  * Safe to re-run: blobs overwrite deterministically and state rows are upserted.
  */
@@ -34,6 +35,8 @@ const docsDir =
   process.env.DOCUMENT_STORE_PATH || path.join(process.cwd(), 'data', 'documents');
 const convDir =
   process.env.CONVERSATION_STORE_PATH || path.join(process.cwd(), 'data', 'conversations');
+const usersDir =
+  process.env.USER_STORE_PATH || path.join(process.cwd(), 'data', 'users');
 
 function safeName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -96,6 +99,16 @@ async function migrateConversations(pool) {
   return { records: count };
 }
 
+async function migrateUsers(pool) {
+  const state = await readJson(path.join(usersDir, 'users.json'), {
+    users: {},
+    sessions: {},
+  });
+  const count = Object.keys(state.users || {}).length;
+  await upsert(pool, 'users', state);
+  return { records: count };
+}
+
 const pool = new Pool({
   connectionString: databaseUrl,
   max: 2,
@@ -115,10 +128,11 @@ try {
 
   const documents = await migrateDocuments(pool);
   const conversations = await migrateConversations(pool);
+  const users = await migrateUsers(pool);
 
   console.log(
-    `Migrated ${documents.records} document(s) (${documents.uploaded} PDF(s) uploaded to Blob) ` +
-      `and ${conversations.records} conversation(s) to Postgres.`,
+    `Migrated ${documents.records} document(s) (${documents.uploaded} PDF(s) uploaded to Blob), ` +
+      `${conversations.records} conversation(s), and ${users.records} user account(s) to Postgres.`,
   );
 } finally {
   await pool.end();
