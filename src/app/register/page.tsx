@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +20,6 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { register } = useAuth();
 
   const [name, setName] = useState('');
@@ -71,7 +69,10 @@ export default function RegisterPage() {
       setLoading(true);
       const res = await register(name, email, password);
       if (res.success) {
-        router.push('/');
+        // Hard navigation so the new session cookie is applied to a fresh
+        // document/server render (avoids the cached unauthenticated redirect).
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+        window.location.assign('/');
       } else {
         setError(res.error || 'Failed to create account.');
       }

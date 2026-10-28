@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +23,6 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -45,7 +43,11 @@ export default function LoginPage() {
       setError(null);
       const res = await login(email, password);
       if (res.success) {
-        router.push('/');
+        // Hard navigation: the proxy prefetches/caches a 307 redirect to /login
+        // for "/" while unauthenticated, so router.push('/') can bounce back
+        // here even though the session cookie is now set.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+        window.location.assign('/');
       } else {
         setError(res.error || 'Invalid email or password.');
       }
